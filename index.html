@@ -349,7 +349,7 @@ function openGuide(key) {
     <div class="mbody"><div class="f"><label>Kisse lena hai</label><div class="inp"><textarea id="gK" rows="4">${esc(g.KisseLena)}</textarea></div></div>
       <div class="f"><label>Script (kya bolna / poochhna hai)</label><div class="inp"><textarea id="gS" rows="8">${esc(g.Script)}</textarea></div></div></div>
     <div class="mfoot"><button class="btn pri grow" data-act="gsave">Save</button></div></div>`;
-  $('#modal').hidden = false;
+  $('#modal').hidden = false; FORM.snap = snap();
 }
 async function saveGuide() {
   try {
@@ -405,8 +405,9 @@ function openForm(key, row, opt) {
       ${e.fields.map(f => fieldHTML(f, d[f.k] || '')).join('')}
     </div>
     <div class="mfoot">${row && row.ID && FORM.mode === 'db' ? `<button class="btn ghost danger" data-act="del" aria-label="Delete">${ic('trash', 20)}</button>` : ''}<button class="btn pri grow" data-act="save">${FORM.mode === 'pv' ? 'Done' : 'Save'}</button></div></div>`;
-  $('#modal').hidden = false;
+  $('#modal').hidden = false; FORM.snap = snap();
 }
+const snap = () => $$('#modal input, #modal textarea, #modal .chip.on, #modal .combo').map(x => x.matches('.chip') ? x.dataset.v : x.matches('.combo') ? x.dataset.val : x.value).join('|');
 function closeForm() { if (fRec) fRec.stop(); $('#modal').hidden = true; $('#modal').innerHTML = ''; FORM = null }
 
 function collect() {
@@ -671,6 +672,21 @@ document.addEventListener('touchend', ev => {
   const k = S.schema.map(e => e.key), n = k[k.indexOf(CUR) + (dx < 0 ? 1 : -1)];
   if (n) { CUR = n; Q = ''; render() }
 }, { passive: true });
+/* Phone ka Back: pehle popup/form band, phir Dashboard, phir "App band karein?" poochho */
+history.replaceState({ b: 0 }, ''); history.pushState({ b: 1 }, '');
+const guard = () => history.pushState({ b: 1 }, '');
+addEventListener('popstate', async () => {
+  if (!$('#ask').hidden) { guard(); return $('#ask [data-i="-1"]').click() }
+  if (!$('#modal').hidden) {
+    guard();
+    if (FORM && FORM.snap !== undefined && snap() !== FORM.snap && await ask('Bina save kiye band karein?', 'Is form me bhari jaankari save nahi hogi.', ['Yes, close']) !== 0) return;
+    return closeForm();
+  }
+  if (REC || PV.state === 'proc') { guard(); return toast('Pehle recording / processing khatam hone dein', 1) }
+  if (TAB !== 'dash') { guard(); TAB = 'dash'; window.scrollTo(0, 0); return render() }
+  if (await ask('App band karein?', 'Aapka saara data save hai.', ['Yes, exit']) !== 0) return guard();
+  history.back(); setTimeout(() => toast('Band karne ke liye Back ek baar aur dabayein'), 600);   // app seedha khula ho to browser khud band karega
+});
 $('#afile').addEventListener('change', ev => { const f = ev.target.files[0]; ev.target.value = ''; if (f) runAudio(f) });
 
 /* ---------------- boot ---------------- */
