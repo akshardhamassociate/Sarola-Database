@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B5D4E">
+<title>Sarola Field Database</title>
+<link rel="icon" href="logo.png">
+<style>
+:root{--bg:#F3F5F7;--card:#fff;--ink:#0F172A;--mut:#64748B;--line:#E4E8EE;--pri:#0B7A65;--pri-d:#0B5D4E;--pri-l:#E3F3EE;--warn:#A15C07;--warn-l:#FDF1D3;--bad:#B42318;--bad-l:#FDE7E4;--sh:0 1px 2px rgba(15,23,42,.05),0 6px 20px rgba(15,23,42,.06);--r:16px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Devanagari",sans-serif}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+svg{display:block;flex:none}
+.wrap{max-width:720px;margin:0 auto}
+.grow{flex:1;min-width:0}
+/* login */
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,#0B5D4E,#0B7A65 55%,#12957B)}
+.lcard{background:#fff;border-radius:22px;padding:28px 22px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+
+.lcard h1{font-size:21px;margin:0 0 4px}.lcard p{margin:0 0 18px;color:var(--mut)}
+/* top */
+.top{position:sticky;top:0;z-index:5;background:rgba(243,245,247,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:10px;padding:12px 16px}
+.brand{font-weight:700;font-size:17px;letter-spacing:-.01em}.sub{color:var(--mut);font-size:12.5px}
+.logo{height:34px;width:auto;display:block;flex:none}.lcard .logo{height:64px;margin-bottom:14px}
+.icon-btn{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--mut)}
+.icon-btn:active{background:var(--line)}
+main{padding:16px 16px 120px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:22px 2px 10px;font-weight:700}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:16px}
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.nav .wrap{display:grid;grid-template-columns:repeat(5,1fr);align-items:end;height:66px}
+.nb{height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--mut);font-size:11.5px;font-weight:600}
+.nb.on{color:var(--pri-d)}
+.nb.big span.c{width:58px;height:58px;border-radius:50%;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;margin-top:-26px;box-shadow:0 8px 20px rgba(11,122,101,.4);border:4px solid #fff}
+.nb.big.on span.c{background:var(--pri-d)}
+/* buttons / inputs */
+.btn{height:50px;padding:0 18px;border-radius:14px;font-weight:650;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:1px solid var(--line)}
+.btn.pri{background:var(--pri);color:#fff;border-color:var(--pri)}.btn.pri:active{background:var(--pri-d)}
+.btn.ghost{background:transparent}.btn.danger{color:var(--bad)}.btn.sm{height:38px;padding:0 12px;border-radius:11px;font-size:13.5px}
+.btn.block{width:100%}
+input[type=text],input[type=tel],input[type=month],input[type=password],textarea{width:100%;min-height:50px;padding:12px 14px;border:1.5px solid var(--line);border-radius:13px;background:#fff;outline:none;font-size:16px}
+textarea{resize:vertical;min-height:64px}
+input:focus,textarea:focus{border-color:var(--pri);box-shadow:0 0 0 4px var(--pri-l)}
+.f{margin-bottom:16px}.f label{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;margin-bottom:7px}
+.req{font-style:normal;font-weight:600;font-size:10.5px;color:var(--pri-d);background:var(--pri-l);padding:2px 7px;border-radius:99px}
+.inp{position:relative}.inp input,.inp textarea{padding-right:50px}
+.fmic{position:absolute;right:6px;top:6px;width:38px;height:38px;border-radius:11px;color:var(--mut);display:flex;align-items:center;justify-content:center}
+.fmic.live{background:var(--bad);color:#fff;animation:pulse 1.2s infinite}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:40px;padding:8px 14px;border-radius:99px;border:1.5px solid var(--line);background:#fff;font-size:14px;font-weight:550;text-align:left}
+.chip.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.combo{position:relative}
+.pill{display:flex;align-items:center;gap:8px;min-height:50px;padding:8px 8px 8px 14px;border:1.5px solid var(--pri);background:var(--pri-l);border-radius:13px;font-weight:600}
+.pill span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.pill button{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--pri-d)}
+.dd{position:absolute;left:0;right:0;top:54px;z-index:3;background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:var(--sh);overflow:hidden;max-height:260px;overflow-y:auto}
+.opt{display:block;width:100%;text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}.opt:last-child{border:0}
+.opt b{display:block;font-weight:600}.opt small{color:var(--mut)}.opt.neu b{color:var(--pri-d)}
+/* dashboard */
+.hero{display:flex;align-items:center;gap:18px}
+.ring{position:relative;width:112px;height:112px;flex:none}
+.ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:27px;font-weight:750;letter-spacing:-.02em}
+.hero h3{margin:0 0 4px;font-size:18px}.hero p{margin:0;color:var(--mut);font-size:13.5px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.stat{background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:12px}.stat b{display:block;font-size:22px;letter-spacing:-.02em}.stat span{color:var(--mut);font-size:12px}
+.stat.bad b{color:var(--bad)}
+.line{display:block;width:100%;text-align:left;padding:13px 0;border-bottom:1px solid var(--line)}.line:last-child{border:0;padding-bottom:0}.line:first-child{padding-top:0}
+.lrow{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:7px}
+.lrow b{font-weight:600}.lrow span{color:var(--mut);font-size:13px;white-space:nowrap}
+.bar{height:8px;border-radius:99px;background:#EDF0F4;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px;background:var(--pri)}
+.bar.late i{background:var(--bad)}.bar.done i{background:#16A34A}
+.tagc{display:inline-block;font-size:11px;font-weight:650;padding:2px 8px;border-radius:99px;background:#EDF0F4;color:var(--mut);margin-left:6px}
+.tagc.late{background:var(--bad-l);color:var(--bad)}.tagc.done{background:#DCFCE7;color:#166534}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.vg{background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:12px;text-align:left}.vg b{display:block;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vg span{font-size:12px;color:var(--mut);display:block;margin-top:6px}
+/* data */
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 16px 12px;margin:0 -16px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;height:38px;padding:0 14px;border-radius:99px;background:#fff;border:1.5px solid var(--line);font-weight:600;font-size:13.5px;color:var(--mut)}
+.tab.on{background:var(--ink);border-color:var(--ink);color:#fff}.tab em{font-style:normal;opacity:.6;margin-left:5px}
+.search{position:relative;margin-bottom:12px}.search svg{position:absolute;left:14px;top:15px;color:var(--mut)}.search input{padding-left:44px}
+.item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:12px;margin-bottom:9px}
+.av{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none}
+.item b{display:block;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.item small{color:var(--mut);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{font-size:11px;font-weight:650;padding:3px 8px;border-radius:99px;background:var(--warn-l);color:var(--warn);flex:none}
+.empty{text-align:center;color:var(--mut);padding:36px 16px}
+.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+/* voice */
+.vhero{text-align:center;padding:26px 16px}
+.bigmic{width:132px;height:132px;border-radius:50%;background:var(--pri);color:#fff;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 14px 34px rgba(11,122,101,.38),0 0 0 12px var(--pri-l)}
+.bigmic.rec{background:var(--bad);box-shadow:0 14px 34px rgba(180,35,24,.35),0 0 0 12px var(--bad-l);animation:pulse 1.4s infinite}
+@keyframes pulse{50%{transform:scale(1.05)}}
+@media (prefers-reduced-motion:reduce){.bigmic.rec,.fmic.live{animation:none}}
+.vhero h3{font-size:19px;margin:22px 0 4px}.vhero p{color:var(--mut);margin:0}
+.timer{font-size:34px;font-weight:750;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:20px}
+.tips{margin:0;padding-left:18px;color:var(--mut);font-size:13.5px}.tips li{margin-bottom:5px}
+.or{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.pcard{background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:13px;margin-bottom:10px;display:flex;gap:11px;align-items:flex-start}
+.pcard.off{opacity:.45}
+.tick{width:28px;height:28px;border-radius:9px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;color:transparent;flex:none;margin-top:1px}
+.tick.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.etag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.pcard b.t{display:block;font-size:15.5px;margin:1px 0 4px}
+.kv{font-size:13.5px;color:#334155}.kv span{color:var(--mut)}
+.ev{font-size:12.5px;color:var(--mut);border-left:3px solid var(--line);padding-left:9px;margin-top:8px;font-style:italic}
+.flags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.flag{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--warn-l);color:var(--warn)}.flag.bad{background:var(--bad-l);color:var(--bad)}.flag.ok{background:var(--pri-l);color:var(--pri-d)}
+.flag button{text-decoration:underline;font-weight:650;margin-left:4px;color:inherit;font-size:inherit}
+.stick{position:sticky;bottom:82px;display:flex;gap:10px;padding-top:10px;background:linear-gradient(transparent,var(--bg) 30%)}
+details.box{background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:12px 14px;margin-bottom:12px}details.box summary{font-weight:600;cursor:pointer}details.box p{margin:10px 0 0;color:#334155;white-space:pre-wrap}
+.prog{height:10px;border-radius:99px;background:#EDF0F4;overflow:hidden;margin:18px auto 0;max-width:320px}.prog i{display:block;height:100%;background:var(--pri);border-radius:99px;transition:width .3s}
+/* modal */
+.modal{position:fixed;inset:0;z-index:20;background:rgba(15,23,42,.45);display:flex;align-items:flex-end;justify-content:center}
+.panel{background:var(--bg);width:100%;max-width:720px;max-height:94vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden}
+@media(min-width:760px){.modal{align-items:center}.panel{border-radius:22px;max-height:88vh}}
+.mhead{display:flex;align-items:center;gap:10px;padding:16px 12px 12px 18px;background:#fff;border-bottom:1px solid var(--line)}
+.mtitle{font-weight:700;font-size:17px}.msub{color:var(--mut);font-size:12.5px}
+.mbody{padding:16px 18px;overflow-y:auto;flex:1}
+.mfoot{display:flex;gap:10px;padding:12px 18px calc(12px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line)}
+.guide{background:var(--pri-l);border-radius:13px;padding:11px 14px;margin-bottom:16px;font-size:13.5px}.guide summary{font-weight:650;color:var(--pri-d);cursor:pointer}.guide p{margin:8px 0 0}.guide b{color:var(--pri-d)}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pick .item{margin:0}
+.askc{background:#fff;border-radius:20px;padding:22px;margin:auto 20px;max-width:380px;width:100%}.askc h3{margin:0 0 6px;font-size:17px}.askc p{margin:0 0 16px;color:var(--mut)}.askc .btn{width:100%;margin-top:8px}
+#ask{align-items:center;z-index:30}
+#busy{position:fixed;inset:0;z-index:40;background:rgba(255,255,255,.75);display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;font-weight:600}
+.spin{width:36px;height:36px;border-radius:50%;border:4px solid var(--pri-l);border-top-color:var(--pri);animation:sp .8s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:50;background:var(--ink);color:#fff;padding:11px 18px;border-radius:13px;font-weight:550;max-width:88vw;text-align:center;box-shadow:var(--sh)}
+#toast.bad{background:var(--bad)}
+</style>
+</head>
+<body>
+
+<div id="login" class="login" hidden>
+  <div class="lcard">
+    <img class="logo" src="logo.png" alt="Akshardham Associates" onerror="this.remove()">
+    <h1>Sarola Field Database</h1>
+    <p id="lmsg" style="color:var(--bad)"></p>
+    <button class="btn pri block" data-act="reload">Dobara try karein</button>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <header class="top"><div class="wrap">
+    <img class="logo" src="logo.png" alt="Akshardham Associates" onerror="this.remove()">
+    <div class="grow"><div class="brand">Sarola Field Database</div><button class="sub" id="who" data-act="who"></button></div>
+    <button class="icon-btn" data-act="reload" aria-label="Refresh" id="bReload"></button>
+  </div></header>
+  <main class="wrap" id="view"></main>
+  <nav class="nav"><div class="wrap" id="nav"></div></nav>
+</div>
+
+<div id="modal" class="modal" hidden></div>
+<div id="ask" class="modal" hidden></div>
+<div id="busy" hidden><div class="spin"></div><div id="busyT">Load ho raha hai…</div></div>
+<div id="toast" hidden></div>
+<input type="file" id="afile" accept="audio/*,video/mp4,.m4a,.mp3,.wav,.ogg,.webm,.aac" hidden>
+
+<script>
+/* ====== YAHAN APNA APPS SCRIPT WEB APP URL PASTE KAREIN ====== */
+const API_URL = 'https://script.google.com/macros/s/AKfycbxgNOAHAa7v1LmnoklvbeHt2kGYBB_7Bq2tqI-8yJQT73VZXgjytt6J_JOetGF5CU4c/exec';
+const USERS = ['Rupesh', 'Krishan', 'Bhavesh', 'Luv'];   // jo log entry karenge; naam yahan jod/hata sakte ho
+/* ============================================================== */
+
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const store = { get(k) { try { return localStorage.getItem(k) } catch (e) { return null } }, set(k, v) { try { localStorage.setItem(k, v) } catch (e) { } }, del(k) { try { localStorage.removeItem(k) } catch (e) { } } };
+const IC = {
+  home: '<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  mic: '<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  book: '<path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3zM8 8h7M8 12h7"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>', refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>',
+  check: '<path d="M5 12l5 5 9-10"/>', stop: '<rect x="6" y="6" width="12" height="12" rx="2"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>', edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+  out: '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 16l4-4-4-4M14 12H3"/>', text: '<path d="M4 6h16M4 12h16M4 18h10"/>'
+};
+const ic = (n, s = 22) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IC[n]}</svg>`;
+const HUES = [162, 220, 28, 280, 200, 340, 45, 255, 12, 185];
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+let S = null, AUTH = { user: store.get('sfd_user') || '' };
+let TAB = 'dash', CUR = 'People', Q = '', FORM = null, TMPN = 0, REC = null, fRec = null;
+let PV = { state: 'idle', items: [], transcript: '', msg: '', pct: 0 };
+
+/* ---------------- API ---------------- */
+async function api(action, body) {
+  let res;
+  try {
+    res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action, user: AUTH.user }, body || {})) });
+  } catch (e) { throw new Error('Internet ya server se connection nahi ho paya') }
+  let j;
+  try { j = JSON.parse(await res.text()) } catch (e) { throw new Error('Backend ka URL ya deployment galat hai: /exec wala URL daalein aur deployment me "Who has access: Anyone" rakhein') }
+  if (!j.ok) throw new Error(j.error || 'Kuch galat hua');
+  return j.data;
+}
+function busy(t) { $('#busyT').textContent = t || 'Load ho raha hai…'; $('#busy').hidden = false }
+function idle() { $('#busy').hidden = true }
+let tT; function toast(m, bad) { const t = $('#toast'); t.textContent = m; t.className = bad ? 'bad' : ''; t.hidden = false; clearTimeout(tT); tT = setTimeout(() => t.hidden = true, bad ? 5000 : 2600) }
+function ask(title, text, btns) {
+  return new Promise(res => {
+    const a = $('#ask');
+    a.innerHTML = `<div class="askc"><h3>${esc(title)}</h3><p>${esc(text)}</p>${btns.map((b, i) => `<button class="btn ${i == 0 ? 'pri' : ''}" data-i="${i}">${esc(b)}</button>`).join('')}<button class="btn ghost" data-i="-1">Cancel</button></div>`;
+    a.hidden = false;
+    a.onclick = e => { const b = e.target.closest('[data-i]'); if (!b) return; a.hidden = true; res(+b.dataset.i < 0 ? null : +b.dataset.i) };
+  });
+}
+
+/* ---------------- helpers ---------------- */
+const ent = k => S.schema.find(e => e.key === k);
+const rows = k => S.data[k] || [];
+const byId = (k, id) => rows(k).find(r => r.ID === id);
+const hue = k => HUES[S.schema.findIndex(e => e.key === k) % HUES.length];
+const mobileOk = v => /^[6-9]\d{9}$/.test(v || '');
+const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+const dShort = d => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || ''); return m ? (+m[3]) + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+m[2] - 1] : '' };
+const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9ऀ-ॿ]/g, '');
+const fold = s => norm(s).replace(/aa/g, 'a').replace(/ee|iy|y/g, 'i').replace(/oo|ou/g, 'u').replace(/w/g, 'v').replace(/(.)\1+/g, '$1');
+function lev(a, b) { const d = Array.from({ length: a.length + 1 }, (_, i) => [i]); for (let j = 1; j <= b.length; j++) d[0][j] = j; for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[a.length][b.length] }
+function findByName(list, name, fuzzy, vid) {
+  const k = fold(name); if (!k) return null;
+  let c = list.filter(r => fold(r.Name) === k);
+  if (!c.length && fuzzy && k.length >= 5) c = list.filter(r => { const f = fold(r.Name); return Math.abs(f.length - k.length) <= 1 && lev(f, k) <= 1 });
+  return (vid && c.find(r => r.VillageID === vid)) || c[0] || null;
+}
+function refLabel(ref, v) {
+  if (!v) return '';
+  if (v.startsWith('new:')) return v.slice(4) + ' (naya)';
+  if (v.startsWith('tmp:')) { const it = PV.items.find(x => x.entity === ref && 'tmp:' + x.tmp === v); if (!it) return ''; const ex = it.existingId && byId(ref, it.existingId); return ex ? titleOf(ref, ex) : titleOf(ref, it.data) + ' (naya)' }
+  const r = byId(ref, v); return r ? titleOf(ref, r) : v;
+}
+function titleOf(k, r) {
+  if (k === 'Connections') return (refLabel('People', r.PersonA) || '?') + ' ↔ ' + (refLabel('People', r.PersonB) || '?');
+  if (k === 'Options') return [r.Type, r.Location].filter(Boolean).join(' · ') || 'Option';
+  return r.Name || '(naam nahi)';
+}
+function subOf(k, r) {
+  const v = r.VillageID ? refLabel('Villages', r.VillageID) : '';
+  const m = {
+    Villages: [r.Population && 'Aabadi ' + r.Population, r.DistanceKm && r.DistanceKm + ' km', r.HaatDay && 'Haat: ' + r.HaatDay],
+    People: [r.Roles, v, r.Mobile], Shops: [r.Type, v, r.OwnerID && refLabel('People', r.OwnerID)], Connections: [r.Type, r.Notes],
+    RealEstate: [r.Kind, v, r.Month], Events: [r.Type, v, r.Day], Organisations: [r.Type, v], Politics: [r.Party, r.Level, v],
+    Vendors: [r.Category, v, r.Mobile], Options: [v, r.Rent && 'Kiraya ' + r.Rent]
+  };
+  return (m[k] || []).filter(Boolean).join(' · ');
+}
+const missing = (e, r) => e.fields.filter(f => f.req && (!r[f.k] || (f.t === 'tel' && !mobileOk(r[f.k]))));
+const initials = s => String(s || '?').split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
+
+/* ---------------- completion % ---------------- */
+function calc() {
+  const V = rows('Villages'), td = today();
+  const match = (r, t) => { if (!t.Field) return true; const v = r[t.Field] || ''; return t.Value === '*' ? !!v : v.split(', ').includes(t.Value) };
+  const lines = S.targets.filter(t => ent(t.Entity)).map(t => {
+    const e = ent(t.Entity), min = +t.Minimum || 1;
+    const ok = rows(t.Entity).filter(r => !missing(e, r).length && match(r, t));
+    let have, need;
+    if (t.Scope === 'PerVillage') { need = min * V.length; have = 0; V.forEach(v => have += Math.min(min, ok.filter(r => r.VillageID === v.ID).length)) }
+    else { need = min; have = Math.min(min, ok.length) }
+    const pct = need ? have / need : 0;
+    return Object.assign({}, t, { have, need, pct, late: !!t.Deadline && t.Deadline < td && pct < 1 });
+  });
+  const per = lines.filter(l => l.Scope === 'PerVillage');
+  const vill = V.map(v => {
+    let h = 0, n = 0;
+    per.forEach(t => { const e = ent(t.Entity), min = +t.Minimum || 1; n += min; h += Math.min(min, rows(t.Entity).filter(r => r.VillageID === v.ID && !missing(e, r).length && match(r, t)).length) });
+    return { v, pct: n ? h / n : 0 };
+  });
+  return { lines, vill, overall: lines.length ? lines.reduce((a, l) => a + l.pct, 0) / lines.length : 0 };
+}
+
+/* ---------------- render ---------------- */
+function render() {
+  $('#nav').innerHTML = [['dash', 'home', 'Dashboard'], ['data', 'list', 'Data'], ['voice', 'mic', 'Bolkar'], ['add', 'plus', 'Naya'], ['guide', 'book', 'Guide']]
+    .map(([k, i, l]) => k === 'voice' ? `<button class="nb big ${TAB == k ? 'on' : ''}" data-tab="${k}"><span class="c">${ic(i, 26)}</span>${l}</button>` : `<button class="nb ${TAB == k ? 'on' : ''}" data-tab="${k}">${ic(i)}${l}</button>`).join('');
+  $('#who').textContent = 'Entry: ' + (AUTH.user || 'naam chunein') + ' · badlein';
+  $('#view').innerHTML = ({ dash: vDash, data: vData, voice: vVoice, guide: vGuide })[TAB]();
+  if (TAB === 'data') renderList();
+}
+
+function vDash() {
+  const c = calc(), p = Math.round(c.overall * 100), C = 2 * Math.PI * 50;
+  const total = S.schema.reduce((a, e) => a + rows(e.key).length, 0);
+  const td = today(), aaj = S.schema.reduce((a, e) => a + rows(e.key).filter(r => (r.CreatedAt || '').startsWith(td)).length, 0);
+  const late = c.lines.filter(l => l.late).length;
+  const last = c.lines.map(l => l.Deadline).filter(Boolean).sort().pop();
+  const left = last ? Math.ceil((new Date(last) - new Date(td)) / 864e5) : null;
+  const sorted = c.lines.slice().sort((a, b) => (b.late - a.late) || ((a.pct >= 1) - (b.pct >= 1)) || String(a.Deadline).localeCompare(String(b.Deadline)));
+  return `
+  <div class="card hero">
+    <div class="ring"><svg width="112" height="112" viewBox="0 0 112 112"><circle cx="56" cy="56" r="50" fill="none" stroke="#EDF0F4" stroke-width="11"/><circle cx="56" cy="56" r="50" fill="none" stroke="var(--pri)" stroke-width="11" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - c.overall)}" transform="rotate(-90 56 56)"/></svg><b>${p}%</b></div>
+    <div class="grow"><h3>Database completion</h3><p>${left == null ? '' : left >= 0 ? `Final deadline ${dShort(last)} · ${left} din baaki` : `Final deadline ${dShort(last)} nikal chuki hai`}</p></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>${total}</b><span>Kul entries</span></div>
+    <div class="stat"><b>${aaj}</b><span>Aaj ki entries</span></div>
+    <div class="stat ${late ? 'bad' : ''}"><b>${late}</b><span>Target late</span></div>
+  </div>
+  <h2>Targets</h2>
+  <div class="card">${sorted.map(l => `<button class="line" data-go="${l.Entity}">
+    <div class="lrow"><b>${esc(l.Label)}${l.pct >= 1 ? '<i class="tagc done">Poora</i>' : l.late ? '<i class="tagc late">Late</i>' : ''}</b><span>${l.have}/${l.need}${l.Deadline ? ' · ' + dShort(l.Deadline) : ''}</span></div>
+    <div class="bar ${l.pct >= 1 ? 'done' : l.late ? 'late' : ''}"><i style="width:${Math.round(l.pct * 100)}%"></i></div></button>`).join('') || '<div class="empty">Targets tab khali hai</div>'}</div>
+  <h2>Gaon-wise</h2>
+  ${c.vill.length ? `<div class="vgrid">${c.vill.map(x => `<button class="vg" data-edit="Villages|${x.v.ID}"><b>${esc(x.v.Name)}</b><div class="bar ${x.pct >= 1 ? 'done' : ''}"><i style="width:${Math.round(x.pct * 100)}%"></i></div><span>${Math.round(x.pct * 100)}% poora</span></button>`).join('')}</div>`
+      : `<div class="card empty"><b>Abhi koi gaon nahi hai</b>Sabse pehle aaspaas ke gaon ki list banayein.<br><br><button class="btn pri" data-new="Villages">${ic('plus', 18)} Gaon jodein</button></div>`}`;
+}
+
+function vData() {
+  return `<div class="tabs">${S.schema.map(e => `<button class="tab ${CUR == e.key ? 'on' : ''}" data-cur="${e.key}">${esc(e.label)}<em>${rows(e.key).length}</em></button>`).join('')}</div>
+  <div class="search">${ic('search', 20)}<input type="text" id="q" placeholder="Naam, gaon ya mobile se khojein" value="${esc(Q)}"></div>
+  <div id="list"></div>
+  <div class="stick"><button class="btn pri grow" data-new="${CUR}">${ic('plus', 18)} Naya ${esc(ent(CUR).one)}</button></div>`;
+}
+function renderList() {
+  const e = ent(CUR), nq = norm(Q), h = hue(CUR);
+  const list = rows(CUR).filter(r => !nq || norm(titleOf(CUR, r) + subOf(CUR, r) + (r.Notes || '')).includes(nq)).reverse();
+  $('#list').innerHTML = list.map(r => `<button class="item" data-edit="${CUR}|${r.ID}">
+    <span class="av" style="background:hsl(${h} 60% 93%);color:hsl(${h} 55% 28%)">${esc(initials(titleOf(CUR, r)))}</span>
+    <span class="grow"><b>${esc(titleOf(CUR, r))}</b><small>${esc(subOf(CUR, r)) || '&nbsp;'}</small></span>
+    ${missing(e, r).length ? '<span class="badge">Adhoora</span>' : ''}</button>`).join('')
+    || `<div class="empty"><b>${Q ? 'Kuch nahi mila' : 'Abhi koi entry nahi'}</b>${Q ? 'Doosra naam likhkar dekhein.' : 'Neeche button se jodein, ya beech wale mic se bolkar bharein.'}</div>`;
+}
+
+function vGuide() {
+  return `<h2 style="margin-top:4px">Kisse poochein aur kya bolein</h2>` + S.schema.map(e => {
+    const g = S.guide.find(x => x.Section === e.key) || {};
+    return `<details class="box" ${e.key === 'People' ? 'open' : ''}><summary>${esc(e.label)}</summary>
+      <p><b>Kisse lena hai:</b> ${esc(g.KisseLena) || 'Abhi nahi bhara'}</p><p><b>Script:</b> ${esc(g.Script) || 'Abhi nahi bhara'}</p></details>`;
+  }).join('') + `<p class="sub" style="padding:4px 2px">Ye jaankari Sheet ke "Guide" tab se aati hai.</p>`;
+}
+
+/* ---------------- form ---------------- */
+function fieldHTML(f, v) {
+  const lab = `<label>${esc(f.l)}${f.req ? '<i class="req">zaroori</i>' : ''}</label>`;
+  if (f.t === 'select' || f.t === 'yn' || f.t === 'multi') {
+    const on = String(v).split(', ').filter(Boolean), opts = f.o || ['Haan', 'Nahi'];
+    return `<div class="f">${lab}<div class="chips" data-k="${f.k}" ${f.t === 'multi' ? 'data-multi="1"' : ''}>${opts.map(o => `<button type="button" class="chip${on.includes(o) ? ' on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
+  }
+  if (f.t === 'ref') return `<div class="f">${lab}<div class="combo" data-k="${f.k}" data-ref="${f.ref}" data-val="${esc(v)}">${comboInner(f.ref, v)}</div></div>`;
+  const mic = SR && f.t !== 'month' ? `<button type="button" class="fmic" data-mic="${f.k}" aria-label="Bolkar bharein">${ic('mic', 19)}</button>` : '';
+  if (f.t === 'textarea') return `<div class="f">${lab}<div class="inp"><textarea data-k="${f.k}" rows="2">${esc(v)}</textarea>${mic}</div></div>`;
+  const num = f.t === 'number' || f.t === 'tel';
+  return `<div class="f">${lab}<div class="inp"><input data-k="${f.k}" type="${f.t === 'month' ? 'month' : f.t === 'tel' ? 'tel' : 'text'}" ${num ? 'inputmode="numeric"' : ''} ${f.t === 'tel' ? 'maxlength="10"' : ''} value="${esc(v)}" autocomplete="off">${mic}</div></div>`;
+}
+function comboInner(ref, v) {
+  return v ? `<div class="pill"><span>${esc(refLabel(ref, v) || v)}</span><button type="button" data-cclear="1" aria-label="Hatayein">${ic('x', 16)}</button></div>`
+    : `<input type="text" class="cinp" placeholder="Naam likhein ya chunein" autocomplete="off"><div class="dd" hidden></div>`;
+}
+function comboOpts(combo, q) {
+  const ref = combo.dataset.ref, nq = norm(q);
+  let list = rows(ref).map(r => ({ id: r.ID, label: titleOf(ref, r), sub: subOf(ref, r) }));
+  if (FORM.mode === 'pv') PV.items.filter(x => x.entity === ref && x !== FORM.item).forEach(x => list.push({ id: 'tmp:' + x.tmp, label: titleOf(ref, x.data) + ' (naya)', sub: '' }));
+  if (FORM.row && FORM.row.ID && FORM.e.key === ref) list = list.filter(o => o.id !== FORM.row.ID);
+  const out = list.filter(o => !nq || norm(o.label).includes(nq)).slice(0, 8);
+  if (q.trim() && !list.some(o => norm(o.label) === nq)) out.push({ id: 'new:' + q.trim(), label: '+ "' + q.trim() + '" naya jodein', sub: '', neu: 1 });
+  return out;
+}
+function comboShow(combo) {
+  const inp = $('.cinp', combo), dd = $('.dd', combo); if (!inp) return;
+  const o = comboOpts(combo, inp.value);
+  dd.innerHTML = o.map(x => `<button type="button" class="opt ${x.neu ? 'neu' : ''}" data-id="${esc(x.id)}"><b>${esc(x.label)}</b>${x.sub ? `<small>${esc(x.sub)}</small>` : ''}</button>`).join('');
+  dd.hidden = !o.length;
+}
+function comboSet(combo, v) { combo.dataset.val = v; combo.innerHTML = comboInner(combo.dataset.ref, v) }
+
+function openForm(key, row, opt) {
+  opt = opt || {};
+  const e = ent(key), d = row || opt.defaults || {};
+  FORM = { e, row: row || null, mode: opt.mode || 'db', item: opt.item || null };
+  const g = S.guide.find(x => x.Section === key);
+  $('#modal').innerHTML = `<div class="panel">
+    <div class="mhead"><div class="grow"><div class="mtitle">${row ? esc(titleOf(key, d)) : 'Naya ' + esc(e.one)}</div><div class="msub">${esc(e.label)}${row && row.ID ? ' · ' + esc(row.ID) : ''}</div></div><button class="icon-btn" data-act="close" aria-label="Band karein">${ic('x')}</button></div>
+    <div class="mbody">
+      ${g && (g.KisseLena || g.Script) ? `<details class="guide"><summary>Kisse poochein aur kya bolein</summary>${g.KisseLena ? `<p><b>Kisse:</b> ${esc(g.KisseLena)}</p>` : ''}${g.Script ? `<p><b>Script:</b> ${esc(g.Script)}</p>` : ''}</details>` : ''}
+      ${e.fields.map(f => fieldHTML(f, d[f.k] || '')).join('')}
+    </div>
+    <div class="mfoot">${row && row.ID && FORM.mode === 'db' ? `<button class="btn ghost danger" data-act="del" aria-label="Delete">${ic('trash', 20)}</button>` : ''}<button class="btn pri grow" data-act="save">${FORM.mode === 'pv' ? 'Theek hai' : 'Save karein'}</button></div></div>`;
+  $('#modal').hidden = false;
+}
+function closeForm() { if (fRec) fRec.stop(); $('#modal').hidden = true; $('#modal').innerHTML = ''; FORM = null }
+
+function collect() {
+  const e = FORM.e, M = $('#modal'), d = {}, extras = [];
+  e.fields.forEach(f => {
+    const w = $(`[data-k="${f.k}"]`, M);
+    if (f.t === 'ref') {
+      let v = w.dataset.val || '';
+      const inp = $('.cinp', w);
+      if (!v && inp && inp.value.trim()) { const ex = comboOpts(w, inp.value).find(o => !o.neu && norm(o.label) === norm(inp.value)); v = ex ? ex.id : 'new:' + inp.value.trim() }
+      if (v.startsWith('new:')) { const tmp = 'n' + (++TMPN); extras.push({ entity: f.ref, tmp, data: { Name: v.slice(4) } }); v = 'tmp:' + tmp }
+      d[f.k] = v;
+    } else if (f.t === 'select' || f.t === 'yn' || f.t === 'multi') d[f.k] = $$('.chip.on', w).map(b => b.dataset.v).join(', ');
+    else d[f.k] = w.value.trim();
+  });
+  extras.forEach(x => { if (x.entity !== 'Villages' && d.VillageID && ent(x.entity).fields.some(f => f.k === 'VillageID')) x.data.VillageID = d.VillageID });
+  return { d, extras };
+}
+function findDup(key, d, selfId) {
+  if (key === 'People') return rows(key).find(r => r.ID !== selfId && ((mobileOk(d.Mobile) && r.Mobile === d.Mobile) || (d.Name && fold(r.Name) === fold(d.Name) && d.VillageID && r.VillageID === d.VillageID)));
+  if (key === 'Villages') return d.Name && rows(key).find(r => r.ID !== selfId && fold(r.Name) === fold(d.Name));
+  if (key === 'Shops') return d.Name && rows(key).find(r => r.ID !== selfId && fold(r.Name) === fold(d.Name) && r.VillageID === d.VillageID);
+  return null;
+}
+function mergeOnto(e, d, ex) { const o = { ID: ex.ID }; e.fields.forEach(f => { if (!d[f.k]) return; o[f.k] = f.t === 'multi' ? [...new Set((ex[f.k] || '').split(', ').concat(d[f.k].split(', ')).filter(Boolean))].join(', ') : d[f.k] }); return o }
+
+async function saveForm() {
+  const e = FORM.e; let { d, extras } = collect();
+  if (!Object.values(d).some(Boolean)) return toast('Kam se kam ek field bharein', 1);
+  if (FORM.mode === 'pv') {
+    const it = FORM.item; it.data = {}; Object.keys(d).forEach(k => { if (d[k]) it.data[k] = d[k] });
+    extras.forEach(x => PV.items.push({ entity: x.entity, tmp: x.tmp, existingId: '', data: x.data, evidence: '', flag: '', include: true, auto: true }));
+    closeForm(); return render();
+  }
+  if (FORM.row) d.ID = FORM.row.ID;
+  else { const dup = findDup(e.key, d); if (dup) { const ch = await ask('Ye pehle se hai', `"${titleOf(e.key, dup)}" database me maujood hai.`, ['Isi ko update karein', 'Naya banayein']); if (ch === null) return; if (ch === 0) d = mergeOnto(e, d, dup) } }
+  try { busy('Save ho raha hai…'); S.data = await api('saveBatch', { items: extras.concat([{ entity: e.key, data: d }]) }); closeForm(); render(); toast('Save ho gaya') }
+  catch (err) { toast(err.message, 1) } finally { idle() }
+}
+async function delForm() {
+  const ch = await ask('Delete karein?', `"${titleOf(FORM.e.key, FORM.row)}" hamesha ke liye hat jayega.`, ['Haan, delete karein']); if (ch !== 0) return;
+  try { busy('Delete ho raha hai…'); S.data = await api('remove', { entity: FORM.e.key, id: FORM.row.ID }); closeForm(); render(); toast('Delete ho gaya') }
+  catch (err) { toast(err.message, 1) } finally { idle() }
+}
+function pickEntity() {
+  FORM = null;
+  $('#modal').innerHTML = `<div class="panel"><div class="mhead"><div class="grow"><div class="mtitle">Kya jodna hai?</div><div class="msub">Type karke bharein</div></div><button class="icon-btn" data-act="close" aria-label="Band karein">${ic('x')}</button></div>
+    <div class="mbody"><div class="pick">${S.schema.map(e => { const h = hue(e.key); return `<button class="item" data-new="${e.key}"><span class="av" style="background:hsl(${h} 60% 93%);color:hsl(${h} 55% 28%)">${ic('plus', 20)}</span><span class="grow"><b>${esc(e.label)}</b><small>${rows(e.key).length} entries</small></span></button>` }).join('')}</div></div></div>`;
+  $('#modal').hidden = false;
+}
+function fieldMic(btn) {
+  if (fRec) { fRec.stop(); return }
+  const el = $(`[data-k="${btn.dataset.mic}"]`, $('#modal')), num = el.inputMode === 'numeric';
+  fRec = new SR(); fRec.lang = el.tagName === 'TEXTAREA' ? 'hi-IN' : 'en-IN'; fRec.interimResults = false;
+  btn.classList.add('live');
+  fRec.onresult = ev => { let t = ev.results[0][0].transcript.trim(); if (num) el.value = t.replace(/\D/g, ''); else el.value = (el.value ? el.value + ' ' : '') + t };
+  fRec.onend = fRec.onerror = () => { btn.classList.remove('live'); fRec = null };
+  fRec.start();
+}
+
+/* ---------------- voice ---------------- */
+function vVoice() {
+  if (PV.state === 'rec') return `<div class="card vhero"><button class="bigmic rec" data-act="recstop" aria-label="Rokein">${ic('stop', 46)}</button><div class="timer" id="rtime">0:00</div><p>Record ho raha hai. Khatam hone par button dabayein.</p><br><button class="btn ghost" data-act="reccancel">Radd karein</button></div>`;
+  if (PV.state === 'proc') return `<div class="card vhero"><div class="spin" style="margin:10px auto"></div><h3 id="pmsg">${esc(PV.msg)}</h3><p>Is screen ko band na karein.</p><div class="prog"><i id="pbar" style="width:${PV.pct}%"></i></div></div>`;
+  if (PV.state === 'pv') return vPreview();
+  return `<div class="card vhero">
+      <button class="bigmic" data-act="recstart" aria-label="Bolna shuru karein">${ic('mic', 52)}</button>
+      <h3>Bolkar bharein</h3><p>Mulaqat ke baad apni baat bolein, entries apne aap ban jayengi.</p>
+      <div class="or"><button class="btn" data-act="upload">${ic('upload', 19)} Recording upload</button><button class="btn" data-act="paste">${ic('text', 19)} Text paste</button></div>
+    </div>
+    <div id="pastebox" ${PV.transcript ? '' : 'hidden'} class="card" style="margin-top:12px"><div class="f"><label>Transcript ya notes yahan paste karein</label><textarea id="ptext" rows="5">${esc(PV.transcript)}</textarea></div><button class="btn pri block" data-act="pastego">Data nikalein</button></div>
+    <h2>Sahi data ke liye</h2>
+    <div class="card"><ul class="tips">
+      <li>Har mulaqat ke turant baad 2 se 5 minute ka note bolein.</li>
+      <li>Gaon ka naam aur vyakti ka poora naam saaf bolein.</li>
+      <li>Mobile number ek-ek ank karke bolein.</li>
+      <li>Save se pehle har entry ek baar dekh lein; peeli aur laal cheezein theek karein.</li>
+    </ul></div>`;
+}
+function vPreview() {
+  const n = PV.items.filter(x => x.include).length;
+  return `<details class="box"><summary>Jo suna gaya (transcript)</summary><p>${esc(PV.transcript)}</p></details>
+  ${PV.items.length ? PV.items.map((it, i) => {
+    const e = ent(it.entity), ex = it.existingId && byId(it.entity, it.existingId), full = Object.assign({}, ex || {}, it.data), miss = missing(e, full);
+    const badTel = e.fields.some(f => f.t === 'tel' && it.data[f.k] && !mobileOk(it.data[f.k]));
+    const kv = e.fields.filter(f => it.data[f.k] && f.k !== 'Name').map(f => `<div><span>${esc(f.l.split(' (')[0])}:</span> ${esc(f.t === 'ref' ? refLabel(f.ref, it.data[f.k]) : it.data[f.k])}</div>`).join('');
+    return `<div class="pcard ${it.include ? '' : 'off'}">
+      <button class="tick ${it.include ? 'on' : ''}" data-ptoggle="${i}" aria-label="Shamil karein">${ic('check', 18)}</button>
+      <div class="grow"><span class="etag" style="color:hsl(${hue(it.entity)} 55% 32%)">${esc(e.label)}</span><b class="t">${esc(titleOf(it.entity, full))}</b><div class="kv">${kv}</div>
+        ${it.evidence ? `<div class="ev">"${esc(it.evidence)}"</div>` : ''}
+        <div class="flags">
+          ${ex ? `<span class="flag ok">Pehle se hai, update hoga<button data-pnew="${i}">Naya banayein</button></span>` : ''}
+          ${badTel ? '<span class="flag bad">Mobile number galat lag raha hai</span>' : ''}
+          ${miss.length ? `<span class="flag">Baaki: ${esc(miss.map(f => f.l.split(' (')[0]).join(', '))}</span>` : ''}
+          ${it.flag ? `<span class="flag">AI: ${esc(it.flag)}</span>` : ''}
+          ${it.auto ? '<span class="flag">Sirf naam se bana, details bharein</span>' : ''}
+        </div></div>
+      <button class="icon-btn" data-pedit="${i}" aria-label="Theek karein">${ic('edit', 20)}</button></div>`;
+  }).join('') : '<div class="card empty"><b>Koi entry nahi nikli</b>Is recording me database ke kaam ki jaankari nahi mili.</div>'}
+  <div class="stick"><button class="btn" data-act="pvcancel">Radd karein</button><button class="btn pri grow" data-act="pvsave" ${n ? '' : 'disabled style="opacity:.5"'}>${n} entries save karein</button></div>`;
+}
+function step(msg, pct) { PV.state = 'proc'; PV.msg = msg; PV.pct = pct; const m = $('#pmsg'); if (m && TAB === 'voice') { m.textContent = msg; $('#pbar').style.width = pct + '%' } else if (TAB === 'voice') render() }
+
+async function startRec() {
+  if (!S.ai.stt || !S.ai.llm) return toast('Backend me AI ki key set nahi hai', 1);
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mr = new MediaRecorder(stream), parts = [];
+    mr.ondataavailable = e => e.data.size && parts.push(e.data);
+    mr.onstop = () => {
+      stream.getTracks().forEach(t => t.stop()); clearInterval(REC.timer);
+      const cancel = REC.cancel, type = mr.mimeType; REC = null;
+      if (cancel) { PV.state = 'idle'; return render() }
+      runAudio(new Blob(parts, { type }));
+    };
+    REC = { mr, t0: Date.now(), cancel: false, timer: setInterval(() => { const el = $('#rtime'); if (!el) return; const s = Math.floor((Date.now() - REC.t0) / 1000); el.textContent = Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2) }, 500) };
+    mr.start(1000); PV.state = 'rec'; render();
+  } catch (e) { toast('Mic ki permission nahi mili', 1) }
+}
+async function runAudio(blob) {
+  try {
+    if (blob.size > 60e6) throw new Error('Recording bahut badi hai. 20 minute se chhoti file chadhayein.');
+    step('Audio taiyar ho rahi hai…', 4);
+    const chunks = splitPcm(await toPcm16k(blob)), session = 'a' + Date.now(); let text = '';
+    for (let i = 0; i < chunks.length; i++) {
+      step(`Sun raha hoon… ${i + 1}/${chunks.length}`, 8 + 72 * i / chunks.length);
+      const req = { audio: b64(wav(chunks[i])), session, index: i }, r = await api('transcribe', req).catch(() => api('transcribe', req)); text += (r.text || '') + ' '; // ek baar retry, taaki ek tukda poori recording na gira de
+    }
+    await runExtract(text.trim());
+  } catch (e) { PV.state = 'idle'; if (TAB === 'voice') render(); toast(e.message || 'Audio process nahi ho payi', 1) }
+}
+async function runExtract(text) {
+  if (!text) throw new Error('Recording me kuch sunai nahi diya');
+  step('Data nikal raha hoon…', 86);
+  PV.transcript = text;   // extract fail ho to bhi transcript paste box me bacha rahe
+  const r = await api('extract', { transcript: text });
+  PV.items = prepItems(r.items || []); PV.state = 'pv';
+  if (TAB === 'voice') render(); else toast('Recording taiyar hai, "Bolkar" tab me dekhein');
+}
+async function toPcm16k(blob) {
+  const AC = window.AudioContext || window.webkitAudioContext, OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const ac = new AC(); let buf;
+  try { buf = await ac.decodeAudioData(await blob.arrayBuffer()) } catch (e) { throw new Error('Ye audio file khul nahi payi. mp3, m4a ya wav try karein.') } finally { ac.close() }
+  const off = new OAC(1, Math.max(1, Math.ceil(buf.duration * 16000)), 16000), s = off.createBufferSource();
+  s.buffer = buf; s.connect(off.destination); s.start(0);
+  return (await off.startRendering()).getChannelData(0);
+}
+/* Sarvam ek baar me 30 second leta hai, isliye 18-27 second ke beech sabse shaant jagah par kaat-te hain */
+function splitPcm(pcm) {
+  const SRt = 16000, out = []; let pos = 0;
+  while (pcm.length - pos > 28 * SRt) {
+    const a = pos + 18 * SRt, b = pos + 27 * SRt, w = 3200; let best = b, bv = Infinity;
+    for (let i = a; i + w <= b; i += w) { let s = 0; for (let j = i; j < i + w; j += 4) s += pcm[j] * pcm[j]; if (s < bv) { bv = s; best = i + w / 2 } }
+    out.push(pcm.subarray(pos, best)); pos = best;
+  }
+  out.push(pcm.subarray(pos)); return out;
+}
+function wav(pcm) {
+  const b = new ArrayBuffer(44 + pcm.length * 2), v = new DataView(b), w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)) };
+  w(0, 'RIFF'); v.setUint32(4, 36 + pcm.length * 2, true); w(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, 16000, true); v.setUint32(28, 32000, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, pcm.length * 2, true);
+  for (let i = 0; i < pcm.length; i++) { const s = Math.max(-1, Math.min(1, pcm[i])); v.setInt16(44 + i * 2, s < 0 ? s * 32768 : s * 32767, true) }
+  return new Uint8Array(b);
+}
+function b64(u8) { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s) }
+
+/* AI ke jawab ko saaf karna: options check, mobile digits, naam ko ID se jodna, duplicate pakadna */
+function prepItems(raw) {
+  const items = []; let n = 0;
+  raw.forEach(it => {
+    const e = it && ent(it.entity); if (!e || !it.data) return;
+    const d = {};
+    e.fields.forEach(f => {
+      let v = it.data[f.k]; if (v == null || v === '') return;
+      if (f.t === 'select' || f.t === 'yn' || f.t === 'multi') {
+        const opts = f.o || ['Haan', 'Nahi'], got = (Array.isArray(v) ? v : String(v).split(',')).map(x => opts.find(o => norm(o) === norm(x))).filter(Boolean);
+        if (got.length) d[f.k] = (f.t === 'multi' ? [...new Set(got)] : [got[0]]).join(', ');
+        return;
+      }
+      v = String(Array.isArray(v) ? v.join(', ') : v).trim();
+      if (f.t === 'tel') { v = v.replace(/\D/g, ''); if (v.length === 12 && v.startsWith('91')) v = v.slice(2); if (v.length === 11 && v[0] === '0') v = v.slice(1) }
+      if (v) d[f.k] = v;
+    });
+    const exId = it.existingId && byId(e.key, String(it.existingId)) ? String(it.existingId) : '';
+    if (!Object.keys(d).length && !exId) return;
+    items.push({ entity: e.key, tmp: String(it.tmp || 'a' + (++n)), existingId: exId, data: d, evidence: String(it.evidence || ''), flag: String(it.flag || ''), include: true });
+  });
+  const resolve = (it, f) => {
+    let v = it.data[f.k]; if (!v) return;
+    if (byId(f.ref, v)) return;
+    if (v.startsWith('tmp:')) { if (items.some(x => x.entity === f.ref && 'tmp:' + x.tmp === v)) return; v = v.slice(4) }
+    const m = findByName(rows(f.ref), v, f.ref === 'Villages', it.data.VillageID);
+    if (m) { it.data[f.k] = m.ID; return }
+    const t = items.find(x => x.entity === f.ref && x !== it && fold(x.data.Name) === fold(v));
+    if (t) { it.data[f.k] = 'tmp:' + t.tmp; return }
+    const tmp = 'r' + (++TMPN), nd = { Name: v };
+    if (f.ref !== 'Villages' && it.data.VillageID) nd.VillageID = it.data.VillageID;
+    items.push({ entity: f.ref, tmp, existingId: '', data: nd, evidence: '', flag: '', include: true, auto: true });
+    it.data[f.k] = 'tmp:' + tmp;
+  };
+  const base = items.slice();
+  base.forEach(it => ent(it.entity).fields.filter(f => f.t === 'ref' && f.ref === 'Villages').forEach(f => resolve(it, f)));
+  base.forEach(it => ent(it.entity).fields.filter(f => f.t === 'ref' && f.ref !== 'Villages').forEach(f => resolve(it, f)));
+  items.forEach(it => { if (!it.existingId) { const dup = findDup(it.entity, it.data); if (dup) it.existingId = dup.ID } });
+  const order = S.schema.map(e => e.key);
+  return items.sort((a, b) => order.indexOf(a.entity) - order.indexOf(b.entity));
+}
+async function savePreview() {
+  const inc = PV.items.filter(x => x.include); if (!inc.length) return;
+  const items = inc.map(it => { const e = ent(it.entity), ex = it.existingId && byId(it.entity, it.existingId); return { entity: it.entity, tmp: it.tmp, source: 'Voice', data: ex ? mergeOnto(e, it.data, ex) : Object.assign({}, it.data) } });
+  try { busy('Save ho raha hai…'); S.data = await api('saveBatch', { items, transcript: PV.transcript }); PV = { state: 'idle', items: [], transcript: '', msg: '', pct: 0 }; TAB = 'dash'; render(); toast(items.length + ' entries save ho gayi') }
+  catch (err) { toast(err.message, 1) } finally { idle() }
+}
+
+/* ---------------- events ---------------- */
+document.addEventListener('click', async ev => {
+  const t = ev.target, c = s => t.closest(s);
+  if (!c('.combo')) $$('.dd').forEach(d => d.hidden = true);
+  let el;
+  if (el = c('[data-tab]')) { if (el.dataset.tab === 'add') return pickEntity(); TAB = el.dataset.tab; window.scrollTo(0, 0); return render() }
+  if (el = c('[data-cur]')) { CUR = el.dataset.cur; Q = ''; return render() }
+  if (el = c('[data-go]')) { CUR = el.dataset.go; Q = ''; TAB = 'data'; window.scrollTo(0, 0); return render() }
+  if (el = c('[data-new]')) return openForm(el.dataset.new, null, el.dataset.new === 'RealEstate' ? { defaults: { Month: today().slice(0, 7) } } : {});
+  if (el = c('[data-edit]')) { const [k, id] = el.dataset.edit.split('|'); return openForm(k, byId(k, id)) }
+  if (el = c('.chip')) { const g = el.parentNode; if (!g.dataset.multi) $$('.chip', g).forEach(b => b !== el && b.classList.remove('on')); return el.classList.toggle('on') }
+  if (el = c('.opt')) return comboSet(el.closest('.combo'), el.dataset.id);
+  if (el = c('[data-cclear]')) { const cb = el.closest('.combo'); comboSet(cb, ''); return $('.cinp', cb).focus() }
+  if (el = c('[data-mic]')) return fieldMic(el);
+  if (el = c('[data-ptoggle]')) { const it = PV.items[+el.dataset.ptoggle]; it.include = !it.include; return render() }
+  if (el = c('[data-pnew]')) { PV.items[+el.dataset.pnew].existingId = ''; return render() }
+  if (el = c('[data-pedit]')) { const it = PV.items[+el.dataset.pedit]; return openForm(it.entity, it.data, { mode: 'pv', item: it }) }
+  if (!(el = c('[data-act]'))) return;
+  switch (el.dataset.act) {
+    case 'close': return closeForm();
+    case 'save': return saveForm();
+    case 'del': return delForm();
+    case 'reload': return load();
+    case 'who': return pickUser();
+    case 'recstart': return startRec();
+    case 'recstop': return REC && REC.mr.stop();
+    case 'reccancel': if (REC) { REC.cancel = true; REC.mr.stop() } return;
+    case 'upload': if (!S.ai.stt || !S.ai.llm) return toast('Backend me AI ki key set nahi hai', 1); return $('#afile').click();
+    case 'paste': $('#pastebox').hidden = false; return $('#ptext').focus();
+    case 'pastego': { const tx = $('#ptext').value.trim(); if (!tx) return toast('Pehle text paste karein', 1); if (!S.ai.llm) return toast('Backend me AI ki key set nahi hai', 1); try { await runExtract(tx) } catch (e) { PV.state = 'idle'; render(); toast(e.message, 1) } return }
+    case 'pvsave': return savePreview();
+    case 'pvcancel': if (await ask('Radd karein?', 'Is recording se nikli entries save nahi hongi.', ['Haan, radd karein']) === 0) { PV = { state: 'idle', items: [], transcript: '', msg: '', pct: 0 }; render() } return;
+  }
+});
+document.addEventListener('input', ev => {
+  if (ev.target.id === 'q') { Q = ev.target.value; return renderList() }
+  if (ev.target.classList.contains('cinp')) comboShow(ev.target.closest('.combo'));
+});
+document.addEventListener('focusin', ev => { if (ev.target.classList.contains('cinp')) comboShow(ev.target.closest('.combo')) });
+$('#afile').addEventListener('change', ev => { const f = ev.target.files[0]; ev.target.value = ''; if (f) runAudio(f) });
+
+/* ---------------- boot ---------------- */
+async function pickUser() {
+  const i = await ask('Entry kaun kar raha hai?', 'Har entry ke saath ye naam save hoga. Koi password nahi hai.', USERS);
+  if (i !== null) { AUTH.user = USERS[i]; store.set('sfd_user', AUTH.user); if (S) render() }
+}
+async function load() {
+  try {
+    busy('Load ho raha hai…');
+    S = await api('init');
+    $('#login').hidden = true; $('#app').hidden = false; render();
+    if (!AUTH.user) pickUser();
+  } catch (e) {
+    $('#app').hidden = true; $('#login').hidden = false; $('#lmsg').textContent = e.message;
+  } finally { idle() }
+}
+$('#bReload').innerHTML = ic('refresh');
+if (!/^https?:/.test(API_URL)) { $('#login').hidden = false; $('#lmsg').textContent = 'Setup baaki hai: index.html me API_URL ki jagah Apps Script web app ka URL paste karein.' }
+else load();
+</script>
+</body>
+</html>
