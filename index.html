@@ -26,6 +26,7 @@ svg{display:block;flex:none}
 .top .wrap{display:flex;align-items:center;gap:10px;padding:12px 16px}
 .brand{font-weight:700;font-size:17px;letter-spacing:-.01em}.sub{color:var(--mut);font-size:12.5px}
 .logo{height:34px;width:auto;display:block;flex:none}.lcard .logo{height:64px;margin-bottom:14px}
+.sub.other{color:var(--warn);font-weight:650}.item small.by{display:flex;align-items:center;gap:4px;color:var(--pri-d)}
 .icon-btn{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--mut)}
 .icon-btn:active{background:var(--line)}
 main{padding:16px 16px 120px}
@@ -80,7 +81,7 @@ input:focus,textarea:focus{border-color:var(--pri);box-shadow:0 0 0 4px var(--pr
 .vg{background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:12px;text-align:left}.vg b{display:block;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vg span{font-size:12px;color:var(--mut);display:block;margin-top:6px}
 /* data */
-.tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 16px 12px;margin:0 -16px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 16px 12px;margin:0 -16px;scrollbar-width:none;position:relative;-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}.tabs::-webkit-scrollbar{display:none}
 .tab{flex:none;height:38px;padding:0 14px;border-radius:99px;background:#fff;border:1.5px solid var(--line);font-weight:600;font-size:13.5px;color:var(--mut)}
 .tab.on{background:var(--ink);border-color:var(--ink);color:#fff}.tab em{font-style:normal;opacity:.6;margin-left:5px}
 .search{position:relative;margin-bottom:12px}.search svg{position:absolute;left:14px;top:15px;color:var(--mut)}.search input{padding-left:44px}
@@ -139,7 +140,7 @@ details.box{background:var(--card);border-radius:14px;box-shadow:var(--sh);paddi
     <img class="logo" src="logo.png" alt="Akshardham Associates" onerror="this.remove()">
     <h1>Sarola Field Database</h1>
     <p id="lmsg" style="color:var(--bad)"></p>
-    <button class="btn pri block" data-act="reload">Dobara try karein</button>
+    <button class="btn pri block" data-act="reload">Retry</button>
   </div>
 </div>
 
@@ -163,6 +164,7 @@ details.box{background:var(--card);border-radius:14px;box-shadow:var(--sh);paddi
 /* ====== YAHAN APNA APPS SCRIPT WEB APP URL PASTE KAREIN ====== */
 const API_URL = 'https://script.google.com/macros/s/AKfycbxgNOAHAa7v1LmnoklvbeHt2kGYBB_7Bq2tqI-8yJQT73VZXgjytt6J_JOetGF5CU4c/exec';
 const USERS = ['Rupesh', 'Krishan', 'Bhavesh', 'Luv'];   // jo log entry karenge; naam yahan jod/hata sakte ho
+const DEFAULT_USER = 'Rupesh';                           // app khulte hi yahi naam, koi sawaal nahi
 /* ============================================================== */
 
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -184,7 +186,10 @@ const ic = (n, s = 22) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" f
 const HUES = [162, 220, 28, 280, 200, 340, 45, 255, 12, 185];
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-let S = null, AUTH = { user: store.get('sfd_user') || '' };
+const QU = new URLSearchParams(location.search).get('u'), QM = QU && USERS.find(x => x.toLowerCase() === QU.toLowerCase());
+if (QM) store.set('sfd_home', QM);   // apna link (...index.html?u=Bhavesh) is phone ka naam hamesha ke liye set karta hai
+const HOME = QM || store.get('sfd_home') || DEFAULT_USER;
+let S = null, AUTH = { user: HOME };   // "change" se badla naam sirf app band hone tak; agli baar phir HOME
 let TAB = 'dash', CUR = 'People', Q = '', FORM = null, TMPN = 0, REC = null, fRec = null;
 let PV = { state: 'idle', items: [], transcript: '', msg: '', pct: 0 };
 
@@ -197,6 +202,7 @@ async function api(action, body) {
   let j;
   try { j = JSON.parse(await res.text()) } catch (e) { throw new Error('Backend ka URL ya deployment galat hai: /exec wala URL daalein aur deployment me "Who has access: Anyone" rakhein') }
   if (!j.ok) throw new Error(j.error || 'Kuch galat hua');
+  if (S && (action === 'saveBatch' || action === 'remove')) { S.data = j.data; store.set('sfd_cache', JSON.stringify(S)) }
   return j.data;
 }
 function busy(t) { $('#busyT').textContent = t || 'Load ho raha hai…'; $('#busy').hidden = false }
@@ -250,6 +256,7 @@ function subOf(k, r) {
   return (m[k] || []).filter(Boolean).join(' · ');
 }
 const missing = (e, r) => e.fields.filter(f => f.req && (!r[f.k] || (f.t === 'tel' && !mobileOk(r[f.k]))));
+const by = r => { const c = r.CreatedBy || r.UpdatedBy || ''; return r.UpdatedBy && r.UpdatedBy !== c ? c + ' · updated: ' + r.UpdatedBy : c };   // kisne entry ki
 const initials = s => String(s || '?').split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
 
 /* ---------------- completion % ---------------- */
@@ -276,11 +283,11 @@ function calc() {
 
 /* ---------------- render ---------------- */
 function render() {
-  $('#nav').innerHTML = [['dash', 'home', 'Dashboard'], ['data', 'list', 'Data'], ['voice', 'mic', 'Bolkar'], ['add', 'plus', 'Naya'], ['guide', 'book', 'Guide']]
+  $('#nav').innerHTML = [['dash', 'home', 'Dashboard'], ['data', 'list', 'Data'], ['voice', 'mic', 'Speak'], ['add', 'plus', 'New'], ['guide', 'book', 'Guide']]
     .map(([k, i, l]) => k === 'voice' ? `<button class="nb big ${TAB == k ? 'on' : ''}" data-tab="${k}"><span class="c">${ic(i, 26)}</span>${l}</button>` : `<button class="nb ${TAB == k ? 'on' : ''}" data-tab="${k}">${ic(i)}${l}</button>`).join('');
-  $('#who').textContent = 'Entry: ' + (AUTH.user || 'naam chunein') + ' · badlein';
+  $('#who').textContent = 'Entry: ' + AUTH.user + ' · change'; $('#who').classList.toggle('other', AUTH.user !== HOME);
   $('#view').innerHTML = ({ dash: vDash, data: vData, voice: vVoice, guide: vGuide })[TAB]();
-  if (TAB === 'data') renderList();
+  if (TAB === 'data') { renderList(); const t = $('.tab.on'); if (t) t.parentNode.scrollLeft = t.offsetLeft - (t.parentNode.clientWidth - t.offsetWidth) / 2 }
 }
 
 function vDash() {
@@ -307,21 +314,21 @@ function vDash() {
     <div class="bar ${l.pct >= 1 ? 'done' : l.late ? 'late' : ''}"><i style="width:${Math.round(l.pct * 100)}%"></i></div></button>`).join('') || '<div class="empty">Targets tab khali hai</div>'}</div>
   <h2>Gaon-wise</h2>
   ${c.vill.length ? `<div class="vgrid">${c.vill.map(x => `<button class="vg" data-edit="Villages|${x.v.ID}"><b>${esc(x.v.Name)}</b><div class="bar ${x.pct >= 1 ? 'done' : ''}"><i style="width:${Math.round(x.pct * 100)}%"></i></div><span>${Math.round(x.pct * 100)}% poora</span></button>`).join('')}</div>`
-      : `<div class="card empty"><b>Abhi koi gaon nahi hai</b>Sabse pehle aaspaas ke gaon ki list banayein.<br><br><button class="btn pri" data-new="Villages">${ic('plus', 18)} Gaon jodein</button></div>`}`;
+      : `<div class="card empty"><b>Abhi koi gaon nahi hai</b>Sabse pehle aaspaas ke gaon ki list banayein.<br><br><button class="btn pri" data-new="Villages">${ic('plus', 18)} Add Gaon</button></div>`}`;
 }
 
 function vData() {
   return `<div class="tabs">${S.schema.map(e => `<button class="tab ${CUR == e.key ? 'on' : ''}" data-cur="${e.key}">${esc(e.label)}<em>${rows(e.key).length}</em></button>`).join('')}</div>
   <div class="search">${ic('search', 20)}<input type="text" id="q" placeholder="Naam, gaon ya mobile se khojein" value="${esc(Q)}"></div>
   <div id="list"></div>
-  <div class="stick"><button class="btn pri grow" data-new="${CUR}">${ic('plus', 18)} Naya ${esc(ent(CUR).one)}</button></div>`;
+  <div class="stick"><button class="btn pri grow" data-new="${CUR}">${ic('plus', 18)} New ${esc(ent(CUR).one)}</button></div>`;
 }
 function renderList() {
   const e = ent(CUR), nq = norm(Q), h = hue(CUR);
   const list = rows(CUR).filter(r => !nq || norm(titleOf(CUR, r) + subOf(CUR, r) + (r.Notes || '')).includes(nq)).reverse();
   $('#list').innerHTML = list.map(r => `<button class="item" data-edit="${CUR}|${r.ID}">
     <span class="av" style="background:hsl(${h} 60% 93%);color:hsl(${h} 55% 28%)">${esc(initials(titleOf(CUR, r)))}</span>
-    <span class="grow"><b>${esc(titleOf(CUR, r))}</b><small>${esc(subOf(CUR, r)) || '&nbsp;'}</small></span>
+    <span class="grow"><b>${esc(titleOf(CUR, r))}</b><small>${esc(subOf(CUR, r)) || '&nbsp;'}</small>${by(r) ? `<small class="by">${ic('edit', 12)} ${esc(by(r))}</small>` : ''}</span>
     ${missing(e, r).length ? '<span class="badge">Adhoora</span>' : ''}</button>`).join('')
     || `<div class="empty"><b>${Q ? 'Kuch nahi mila' : 'Abhi koi entry nahi'}</b>${Q ? 'Doosra naam likhkar dekhein.' : 'Neeche button se jodein, ya beech wale mic se bolkar bharein.'}</div>`;
 }
@@ -357,7 +364,7 @@ function comboOpts(combo, q) {
   if (FORM.mode === 'pv') PV.items.filter(x => x.entity === ref && x !== FORM.item).forEach(x => list.push({ id: 'tmp:' + x.tmp, label: titleOf(ref, x.data) + ' (naya)', sub: '' }));
   if (FORM.row && FORM.row.ID && FORM.e.key === ref) list = list.filter(o => o.id !== FORM.row.ID);
   const out = list.filter(o => !nq || norm(o.label).includes(nq)).slice(0, 8);
-  if (q.trim() && !list.some(o => norm(o.label) === nq)) out.push({ id: 'new:' + q.trim(), label: '+ "' + q.trim() + '" naya jodein', sub: '', neu: 1 });
+  if (q.trim() && !list.some(o => norm(o.label) === nq)) out.push({ id: 'new:' + q.trim(), label: '+ Add "' + q.trim() + '"', sub: '', neu: 1 });
   return out;
 }
 function comboShow(combo) {
@@ -374,12 +381,12 @@ function openForm(key, row, opt) {
   FORM = { e, row: row || null, mode: opt.mode || 'db', item: opt.item || null };
   const g = S.guide.find(x => x.Section === key);
   $('#modal').innerHTML = `<div class="panel">
-    <div class="mhead"><div class="grow"><div class="mtitle">${row ? esc(titleOf(key, d)) : 'Naya ' + esc(e.one)}</div><div class="msub">${esc(e.label)}${row && row.ID ? ' · ' + esc(row.ID) : ''}</div></div><button class="icon-btn" data-act="close" aria-label="Band karein">${ic('x')}</button></div>
+    <div class="mhead"><div class="grow"><div class="mtitle">${row ? esc(titleOf(key, d)) : 'Naya ' + esc(e.one)}</div><div class="msub">${esc(e.label)}${row && row.ID ? ' · ' + esc(row.ID) + (by(row) ? ' · by ' + esc(by(row)) : '') : ''}</div></div><button class="icon-btn" data-act="close" aria-label="Band karein">${ic('x')}</button></div>
     <div class="mbody">
       ${g && (g.KisseLena || g.Script) ? `<details class="guide"><summary>Kisse poochein aur kya bolein</summary>${g.KisseLena ? `<p><b>Kisse:</b> ${esc(g.KisseLena)}</p>` : ''}${g.Script ? `<p><b>Script:</b> ${esc(g.Script)}</p>` : ''}</details>` : ''}
       ${e.fields.map(f => fieldHTML(f, d[f.k] || '')).join('')}
     </div>
-    <div class="mfoot">${row && row.ID && FORM.mode === 'db' ? `<button class="btn ghost danger" data-act="del" aria-label="Delete">${ic('trash', 20)}</button>` : ''}<button class="btn pri grow" data-act="save">${FORM.mode === 'pv' ? 'Theek hai' : 'Save karein'}</button></div></div>`;
+    <div class="mfoot">${row && row.ID && FORM.mode === 'db' ? `<button class="btn ghost danger" data-act="del" aria-label="Delete">${ic('trash', 20)}</button>` : ''}<button class="btn pri grow" data-act="save">${FORM.mode === 'pv' ? 'Done' : 'Save'}</button></div></div>`;
   $('#modal').hidden = false;
 }
 function closeForm() { if (fRec) fRec.stop(); $('#modal').hidden = true; $('#modal').innerHTML = ''; FORM = null }
@@ -417,12 +424,12 @@ async function saveForm() {
     closeForm(); return render();
   }
   if (FORM.row) d.ID = FORM.row.ID;
-  else { const dup = findDup(e.key, d); if (dup) { const ch = await ask('Ye pehle se hai', `"${titleOf(e.key, dup)}" database me maujood hai.`, ['Isi ko update karein', 'Naya banayein']); if (ch === null) return; if (ch === 0) d = mergeOnto(e, d, dup) } }
+  else { const dup = findDup(e.key, d); if (dup) { const ch = await ask('Ye pehle se hai', `"${titleOf(e.key, dup)}" database me maujood hai.`, ['Update existing', 'Create new']); if (ch === null) return; if (ch === 0) d = mergeOnto(e, d, dup) } }
   try { busy('Save ho raha hai…'); S.data = await api('saveBatch', { items: extras.concat([{ entity: e.key, data: d }]) }); closeForm(); render(); toast('Save ho gaya') }
   catch (err) { toast(err.message, 1) } finally { idle() }
 }
 async function delForm() {
-  const ch = await ask('Delete karein?', `"${titleOf(FORM.e.key, FORM.row)}" hamesha ke liye hat jayega.`, ['Haan, delete karein']); if (ch !== 0) return;
+  const ch = await ask('Delete karein?', `"${titleOf(FORM.e.key, FORM.row)}" hamesha ke liye hat jayega.`, ['Yes, delete']); if (ch !== 0) return;
   try { busy('Delete ho raha hai…'); S.data = await api('remove', { entity: FORM.e.key, id: FORM.row.ID }); closeForm(); render(); toast('Delete ho gaya') }
   catch (err) { toast(err.message, 1) } finally { idle() }
 }
@@ -444,15 +451,15 @@ function fieldMic(btn) {
 
 /* ---------------- voice ---------------- */
 function vVoice() {
-  if (PV.state === 'rec') return `<div class="card vhero"><button class="bigmic rec" data-act="recstop" aria-label="Rokein">${ic('stop', 46)}</button><div class="timer" id="rtime">0:00</div><p>Record ho raha hai. Khatam hone par button dabayein.</p><br><button class="btn ghost" data-act="reccancel">Radd karein</button></div>`;
+  if (PV.state === 'rec') return `<div class="card vhero"><button class="bigmic rec" data-act="recstop" aria-label="Rokein">${ic('stop', 46)}</button><div class="timer" id="rtime">0:00</div><p>Record ho raha hai. Khatam hone par button dabayein.</p><br><button class="btn ghost" data-act="reccancel">Discard</button></div>`;
   if (PV.state === 'proc') return `<div class="card vhero"><div class="spin" style="margin:10px auto"></div><h3 id="pmsg">${esc(PV.msg)}</h3><p>Is screen ko band na karein.</p><div class="prog"><i id="pbar" style="width:${PV.pct}%"></i></div></div>`;
   if (PV.state === 'pv') return vPreview();
   return `<div class="card vhero">
       <button class="bigmic" data-act="recstart" aria-label="Bolna shuru karein">${ic('mic', 52)}</button>
       <h3>Bolkar bharein</h3><p>Mulaqat ke baad apni baat bolein, entries apne aap ban jayengi.</p>
-      <div class="or"><button class="btn" data-act="upload">${ic('upload', 19)} Recording upload</button><button class="btn" data-act="paste">${ic('text', 19)} Text paste</button></div>
+      <div class="or"><button class="btn" data-act="upload">${ic('upload', 19)} Upload recording</button><button class="btn" data-act="paste">${ic('text', 19)} Paste text</button></div>
     </div>
-    <div id="pastebox" ${PV.transcript ? '' : 'hidden'} class="card" style="margin-top:12px"><div class="f"><label>Transcript ya notes yahan paste karein</label><textarea id="ptext" rows="5">${esc(PV.transcript)}</textarea></div><button class="btn pri block" data-act="pastego">Data nikalein</button></div>
+    <div id="pastebox" ${PV.transcript ? '' : 'hidden'} class="card" style="margin-top:12px"><div class="f"><label>Transcript ya notes yahan paste karein</label><textarea id="ptext" rows="5">${esc(PV.transcript)}</textarea></div><button class="btn pri block" data-act="pastego">Extract data</button></div>
     <h2>Sahi data ke liye</h2>
     <div class="card"><ul class="tips">
       <li>Har mulaqat ke turant baad 2 se 5 minute ka note bolein.</li>
@@ -473,7 +480,7 @@ function vPreview() {
       <div class="grow"><span class="etag" style="color:hsl(${hue(it.entity)} 55% 32%)">${esc(e.label)}</span><b class="t">${esc(titleOf(it.entity, full))}</b><div class="kv">${kv}</div>
         ${it.evidence ? `<div class="ev">"${esc(it.evidence)}"</div>` : ''}
         <div class="flags">
-          ${ex ? `<span class="flag ok">Pehle se hai, update hoga<button data-pnew="${i}">Naya banayein</button></span>` : ''}
+          ${ex ? `<span class="flag ok">Pehle se hai, update hoga<button data-pnew="${i}">Create new</button></span>` : ''}
           ${badTel ? '<span class="flag bad">Mobile number galat lag raha hai</span>' : ''}
           ${miss.length ? `<span class="flag">Baaki: ${esc(miss.map(f => f.l.split(' (')[0]).join(', '))}</span>` : ''}
           ${it.flag ? `<span class="flag">AI: ${esc(it.flag)}</span>` : ''}
@@ -481,7 +488,7 @@ function vPreview() {
         </div></div>
       <button class="icon-btn" data-pedit="${i}" aria-label="Theek karein">${ic('edit', 20)}</button></div>`;
   }).join('') : '<div class="card empty"><b>Koi entry nahi nikli</b>Is recording me database ke kaam ki jaankari nahi mili.</div>'}
-  <div class="stick"><button class="btn" data-act="pvcancel">Radd karein</button><button class="btn pri grow" data-act="pvsave" ${n ? '' : 'disabled style="opacity:.5"'}>${n} entries save karein</button></div>`;
+  <div class="stick"><button class="btn" data-act="pvcancel">Discard</button><button class="btn pri grow" data-act="pvsave" ${n ? '' : 'disabled style="opacity:.5"'}>Save ${n} entries</button></div>`;
 }
 function step(msg, pct) { PV.state = 'proc'; PV.msg = msg; PV.pct = pct; const m = $('#pmsg'); if (m && TAB === 'voice') { m.textContent = msg; $('#pbar').style.width = pct + '%' } else if (TAB === 'voice') render() }
 
@@ -519,7 +526,7 @@ async function runExtract(text) {
   PV.transcript = text;   // extract fail ho to bhi transcript paste box me bacha rahe
   const r = await api('extract', { transcript: text });
   PV.items = prepItems(r.items || []); PV.state = 'pv';
-  if (TAB === 'voice') render(); else toast('Recording taiyar hai, "Bolkar" tab me dekhein');
+  if (TAB === 'voice') render(); else toast('Recording taiyar hai, "Speak" tab me dekhein');
 }
 async function toPcm16k(blob) {
   const AC = window.AudioContext || window.webkitAudioContext, OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
@@ -627,7 +634,7 @@ document.addEventListener('click', async ev => {
     case 'paste': $('#pastebox').hidden = false; return $('#ptext').focus();
     case 'pastego': { const tx = $('#ptext').value.trim(); if (!tx) return toast('Pehle text paste karein', 1); if (!S.ai.llm) return toast('Backend me AI ki key set nahi hai', 1); try { await runExtract(tx) } catch (e) { PV.state = 'idle'; render(); toast(e.message, 1) } return }
     case 'pvsave': return savePreview();
-    case 'pvcancel': if (await ask('Radd karein?', 'Is recording se nikli entries save nahi hongi.', ['Haan, radd karein']) === 0) { PV = { state: 'idle', items: [], transcript: '', msg: '', pct: 0 }; render() } return;
+    case 'pvcancel': if (await ask('Radd karein?', 'Is recording se nikli entries save nahi hongi.', ['Yes, discard']) === 0) { PV = { state: 'idle', items: [], transcript: '', msg: '', pct: 0 }; render() } return;
   }
 });
 document.addEventListener('input', ev => {
@@ -635,22 +642,35 @@ document.addEventListener('input', ev => {
   if (ev.target.classList.contains('cinp')) comboShow(ev.target.closest('.combo'));
 });
 document.addEventListener('focusin', ev => { if (ev.target.classList.contains('cinp')) comboShow(ev.target.closest('.combo')) });
+document.addEventListener('wheel', ev => { const t = ev.target.closest('.tabs'); if (t && Math.abs(ev.deltaY) > Math.abs(ev.deltaX)) { t.scrollLeft += ev.deltaY; ev.preventDefault() } }, { passive: false });
+let SW = null;   // Data screen par left/right swipe = agla/pichhla tab
+document.addEventListener('touchstart', ev => { SW = TAB === 'data' && $('#modal').hidden && !ev.target.closest('.tabs') ? [ev.touches[0].clientX, ev.touches[0].clientY] : null }, { passive: true });
+document.addEventListener('touchend', ev => {
+  if (!SW) return; const t = ev.changedTouches[0], dx = t.clientX - SW[0], dy = t.clientY - SW[1]; SW = null;
+  if (Math.abs(dx) < 70 || Math.abs(dx) < 2 * Math.abs(dy)) return;
+  const k = S.schema.map(e => e.key), n = k[k.indexOf(CUR) + (dx < 0 ? 1 : -1)];
+  if (n) { CUR = n; Q = ''; render() }
+}, { passive: true });
 $('#afile').addEventListener('change', ev => { const f = ev.target.files[0]; ev.target.value = ''; if (f) runAudio(f) });
 
 /* ---------------- boot ---------------- */
 async function pickUser() {
-  const i = await ask('Entry kaun kar raha hai?', 'Har entry ke saath ye naam save hoga. Koi password nahi hai.', USERS);
-  if (i !== null) { AUTH.user = USERS[i]; store.set('sfd_user', AUTH.user); if (S) render() }
+  const i = await ask('Entry kaun kar raha hai?', `Har entry ke saath ye naam Sheet me save hoga. App band karne par naam wapas ${HOME} ho jayega.`, USERS);
+  if (i !== null) { AUTH.user = USERS[i]; if (S) render(); if (AUTH.user !== HOME) toast('Ab entries ' + AUTH.user + ' ke naam se hongi') }
 }
+/* Pehle phone me rakha pichhla data turant dikhao, server (Apps Script, 3-8 sec) ka naya data peeche se aane do */
 async function load() {
-  try {
-    busy('Load ho raha hai…');
-    S = await api('init');
-    $('#login').hidden = true; $('#app').hidden = false; render();
-    if (!AUTH.user) pickUser();
-  } catch (e) {
-    $('#app').hidden = true; $('#login').hidden = false; $('#lmsg').textContent = e.message;
-  } finally { idle() }
+  let cached = null;
+  if (!S) { try { cached = JSON.parse(store.get('sfd_cache')) } catch (e) { } }
+  if (cached && cached.schema) { S = cached; show(true) } else busy('Load ho raha hai…');
+  try { S = await api('init'); store.set('sfd_cache', JSON.stringify(S)); show(!cached) }
+  catch (e) { if (S) toast('Server se naya data nahi aaya, pichhla data dikh raha hai', 1); else { $('#app').hidden = true; $('#login').hidden = false; $('#lmsg').textContent = e.message } }
+  finally { idle() }
+}
+function show(force) {
+  $('#login').hidden = true; $('#app').hidden = false;
+  const a = document.activeElement, busyUser = !$('#modal').hidden || (a && /INPUT|TEXTAREA/.test(a.tagName)) || PV.state === 'rec' || PV.state === 'proc';
+  if (force || !busyUser) render();   // form bhar rahe ho to beech me screen nahi badlegi
 }
 $('#bReload').innerHTML = ic('refresh');
 if (!/^https?:/.test(API_URL)) { $('#login').hidden = false; $('#lmsg').textContent = 'Setup baaki hai: index.html me API_URL ki jagah Apps Script web app ka URL paste karein.' }
