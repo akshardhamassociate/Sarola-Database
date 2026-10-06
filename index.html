@@ -337,8 +337,26 @@ function vGuide() {
   return `<h2 style="margin-top:4px">Kisse poochein aur kya bolein</h2>` + S.schema.map(e => {
     const g = S.guide.find(x => x.Section === e.key) || {};
     return `<details class="box" ${e.key === 'People' ? 'open' : ''}><summary>${esc(e.label)}</summary>
-      <p><b>Kisse lena hai:</b> ${esc(g.KisseLena) || 'Abhi nahi bhara'}</p><p><b>Script:</b> ${esc(g.Script) || 'Abhi nahi bhara'}</p></details>`;
-  }).join('') + `<p class="sub" style="padding:4px 2px">Ye jaankari Sheet ke "Guide" tab se aati hai.</p>`;
+      <p><b>Kisse lena hai:</b> ${esc(g.KisseLena) || 'Abhi nahi bhara'}</p><p><b>Script:</b> ${esc(g.Script) || 'Abhi nahi bhara'}</p>
+      <p style="display:flex;align-items:center;gap:10px"><button class="btn" data-gedit="${e.key}">${ic('edit', 18)} Edit</button><span class="sub">${g.UpdatedBy ? 'Last edit: ' + esc(g.UpdatedBy) + ' · ' + esc(dShort(g.UpdatedAt)) : ''}</span></p></details>`;
+  }).join('') + `<p class="sub" style="padding:4px 2px">Edit karne par Sheet ke "Guide" tab me bhi badal jata hai.</p>`;
+}
+function openGuide(key) {
+  const e = ent(key), g = S.guide.find(x => x.Section === key) || {};
+  FORM = { guide: key };
+  $('#modal').innerHTML = `<div class="panel">
+    <div class="mhead"><div class="grow"><div class="mtitle">Guide: ${esc(e.label)}</div><div class="msub">Kisse poochein aur kya bolein</div></div><button class="icon-btn" data-act="close" aria-label="Close">${ic('x')}</button></div>
+    <div class="mbody"><div class="f"><label>Kisse lena hai</label><div class="inp"><textarea id="gK" rows="4">${esc(g.KisseLena)}</textarea></div></div>
+      <div class="f"><label>Script (kya bolna / poochhna hai)</label><div class="inp"><textarea id="gS" rows="8">${esc(g.Script)}</textarea></div></div></div>
+    <div class="mfoot"><button class="btn pri grow" data-act="gsave">Save</button></div></div>`;
+  $('#modal').hidden = false;
+}
+async function saveGuide() {
+  try {
+    busy('Save ho raha hai…');
+    S.guide = await api('saveGuide', { section: FORM.guide, KisseLena: $('#gK').value, Script: $('#gS').value });
+    store.set('sfd_cache', JSON.stringify(S)); closeForm(); render(); toast('Guide save ho gaya');
+  } catch (err) { toast(err.message, 1) } finally { idle() }
 }
 
 /* ---------------- form ---------------- */
@@ -619,10 +637,12 @@ document.addEventListener('click', async ev => {
   if (el = c('[data-mic]')) return fieldMic(el);
   if (el = c('[data-ptoggle]')) { const it = PV.items[+el.dataset.ptoggle]; it.include = !it.include; return render() }
   if (el = c('[data-pnew]')) { PV.items[+el.dataset.pnew].existingId = ''; return render() }
+  if (el = c('[data-gedit]')) return openGuide(el.dataset.gedit);
   if (el = c('[data-pedit]')) { const it = PV.items[+el.dataset.pedit]; return openForm(it.entity, it.data, { mode: 'pv', item: it }) }
   if (!(el = c('[data-act]'))) return;
   switch (el.dataset.act) {
     case 'close': return closeForm();
+    case 'gsave': return saveGuide();
     case 'save': return saveForm();
     case 'del': return delForm();
     case 'reload': return load();
