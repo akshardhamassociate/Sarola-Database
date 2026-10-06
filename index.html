@@ -164,7 +164,8 @@ details.box{background:var(--card);border-radius:14px;box-shadow:var(--sh);paddi
 /* ====== YAHAN APNA APPS SCRIPT WEB APP URL PASTE KAREIN ====== */
 const API_URL = 'https://script.google.com/macros/s/AKfycbxgNOAHAa7v1LmnoklvbeHt2kGYBB_7Bq2tqI-8yJQT73VZXgjytt6J_JOetGF5CU4c/exec';
 const USERS = ['Rupesh', 'Krishan', 'Bhavesh', 'Luv'];   // jo log entry karenge; naam yahan jod/hata sakte ho
-const DEFAULT_USER = 'Rupesh';                           // app khulte hi yahi naam, koi sawaal nahi
+const DEFAULT_USER = 'Rupesh';
+const VER = '6 Oct · v8';   // Guide tab ke neeche dikhta hai: naya index.html phone tak pahuncha ya nahi                           // app khulte hi yahi naam, koi sawaal nahi
 /* ============================================================== */
 
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -339,7 +340,7 @@ function vGuide() {
     return `<details class="box" ${e.key === 'People' ? 'open' : ''}><summary>${esc(e.label)}</summary>
       <p><b>Kisse lena hai:</b> ${esc(g.KisseLena) || 'Abhi nahi bhara'}</p><p><b>Script:</b> ${esc(g.Script) || 'Abhi nahi bhara'}</p>
       <p style="display:flex;align-items:center;gap:10px"><button class="btn" data-gedit="${e.key}">${ic('edit', 18)} Edit</button><span class="sub">${g.UpdatedBy ? 'Last edit: ' + esc(g.UpdatedBy) + ' · ' + esc(dShort(g.UpdatedAt)) : ''}</span></p></details>`;
-  }).join('') + `<p class="sub" style="padding:4px 2px">Edit karne par Sheet ke "Guide" tab me bhi badal jata hai.</p>`;
+  }).join('') + `<p class="sub" style="padding:4px 2px">Edit karne par Sheet ke "Guide" tab me bhi badal jata hai.<br>App version: ${VER}</p>`;
 }
 function openGuide(key) {
   const e = ent(key), g = S.guide.find(x => x.Section === key) || {};
@@ -673,8 +674,11 @@ document.addEventListener('touchend', ev => {
   if (n) { CUR = n; Q = ''; render() }
 }, { passive: true });
 /* Phone ka Back: pehle popup/form band, phir Dashboard, phir "App band karein?" poochho */
-history.replaceState({ b: 0 }, ''); history.pushState({ b: 1 }, '');
+/* Android Chrome bina tap ke bani history entry ko Back par skip kar deta hai (app seedha band). Isliye guard pehle tap ke baad lagta hai. */
+history.replaceState({ b: 0 }, '');
 const guard = () => history.pushState({ b: 1 }, '');
+let ARMED = false;
+addEventListener('pointerdown', () => { if (!ARMED) { ARMED = true; guard() } }, true);
 addEventListener('popstate', async () => {
   if (!$('#ask').hidden) { guard(); return $('#ask [data-i="-1"]').click() }
   if (!$('#modal').hidden) {
@@ -685,7 +689,7 @@ addEventListener('popstate', async () => {
   if (REC || PV.state === 'proc') { guard(); return toast('Pehle recording / processing khatam hone dein', 1) }
   if (TAB !== 'dash') { guard(); TAB = 'dash'; window.scrollTo(0, 0); return render() }
   if (await ask('App band karein?', 'Aapka saara data save hai.', ['Yes, exit']) !== 0) return guard();
-  history.back(); setTimeout(() => toast('Band karne ke liye Back ek baar aur dabayein'), 600);   // app seedha khula ho to browser khud band karega
+  ARMED = false; history.back(); setTimeout(() => toast('Band karne ke liye Back ek baar aur dabayein'), 600);   // app seedha khula ho to browser khud band karega
 });
 $('#afile').addEventListener('change', ev => { const f = ev.target.files[0]; ev.target.value = ''; if (f) runAudio(f) });
 
