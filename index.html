@@ -27,6 +27,7 @@ svg{display:block;flex:none}
 .brand{font-weight:700;font-size:17px;letter-spacing:-.01em}.sub{color:var(--mut);font-size:12.5px}
 .logo{height:34px;width:auto;display:block;flex:none}.lcard .logo{height:64px;margin-bottom:14px}
 .sub.other{color:var(--warn);font-weight:650}.item small.by{display:flex;align-items:center;gap:4px;color:var(--pri-d)}
+.fsec{font-size:12.5px;font-weight:750;text-transform:uppercase;letter-spacing:.06em;color:var(--pri-d);margin:24px 0 12px;padding-top:16px;border-top:1px solid var(--line)}.mbody .fsec:first-of-type{margin-top:4px;padding-top:0;border-top:0}
 .icon-btn{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--mut)}
 .icon-btn:active{background:var(--line)}
 main{padding:16px 16px 120px}
@@ -165,7 +166,7 @@ details.box{background:var(--card);border-radius:14px;box-shadow:var(--sh);paddi
 const API_URL = 'https://script.google.com/macros/s/AKfycbxgNOAHAa7v1LmnoklvbeHt2kGYBB_7Bq2tqI-8yJQT73VZXgjytt6J_JOetGF5CU4c/exec';
 const USERS = ['Rupesh', 'Krishan', 'Bhavesh', 'Luv'];   // jo log entry karenge; naam yahan jod/hata sakte ho
 const DEFAULT_USER = 'Rupesh';
-const VER = '15 Oct · v10';   // Guide tab ke neeche dikhta hai: naya index.html phone tak pahuncha ya nahi                           // app khulte hi yahi naam, koi sawaal nahi
+const VER = '15 Oct · v11';   // Guide tab ke neeche dikhta hai: naya index.html phone tak pahuncha ya nahi                           // app khulte hi yahi naam, koi sawaal nahi
 /* ============================================================== */
 
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -316,7 +317,7 @@ function vDash() {
     <div class="bar ${l.pct >= 1 ? 'done' : l.late ? 'late' : ''}"><i style="width:${Math.round(l.pct * 100)}%"></i></div></button>`).join('') || '<div class="empty">Targets tab is empty</div>'}</div>
   <h2>By village</h2>
   ${c.vill.length ? `<div class="vgrid">${c.vill.map(x => `<button class="vg" data-edit="Villages|${x.v.ID}"><b>${esc(x.v.Name)}</b><div class="bar ${x.pct >= 1 ? 'done' : ''}"><i style="width:${Math.round(x.pct * 100)}%"></i></div><span>${Math.round(x.pct * 100)}% done</span></button>`).join('')}</div>`
-      : `<div class="card empty"><b>No villages yet</b>Start by adding the list of nearby villages.<br><br><button class="btn pri" data-new="Villages">${ic('plus', 18)} Add village</button></div>`}`;
+      : `<div class="card empty"><b>No villages yet</b>Start by adding the list of nearby villages.<br><br><button class="btn pri" data-new="Villages">${ic('plus', 18)} New Village</button></div>`}`;
 }
 
 function vData() {
@@ -363,6 +364,10 @@ async function saveGuide() {
 
 /* ---------------- form ---------------- */
 function fieldHTML(f, v) {
+  if (f.hide) return '';   // Notes jaisi fields form me nahi; AI / Sheet se bharti hain
+  return (f.sec ? `<h3 class="fsec">${esc(f.sec)}</h3>` : '') + fieldInner(f, v);
+}
+function fieldInner(f, v) {
   const lab = `<label>${esc(f.l)}${f.req ? '<i class="req">required</i>' : ''}</label>`;
   if (f.t === 'select' || f.t === 'yn' || f.t === 'multi') {
     const on = String(v).split(', ').filter(Boolean), opts = f.o || ['Yes', 'No'];
@@ -370,9 +375,9 @@ function fieldHTML(f, v) {
   }
   if (f.t === 'ref') return `<div class="f">${lab}<div class="combo" data-k="${f.k}" data-ref="${f.ref}" data-val="${esc(v)}">${comboInner(f.ref, v)}</div></div>`;
   const mic = SR && f.t !== 'month' ? `<button type="button" class="fmic" data-mic="${f.k}" aria-label="Fill by voice">${ic('mic', 19)}</button>` : '';
-  if (f.t === 'textarea') return `<div class="f">${lab}<div class="inp"><textarea data-k="${f.k}" rows="2">${esc(v)}</textarea>${mic}</div></div>`;
+  if (f.t === 'textarea') return `<div class="f">${lab}<div class="inp"><textarea data-k="${f.k}" rows="2" placeholder="${esc(f.ph || '')}">${esc(v)}</textarea>${mic}</div></div>`;
   const num = f.t === 'number' || f.t === 'tel';
-  return `<div class="f">${lab}<div class="inp"><input data-k="${f.k}" type="${f.t === 'month' ? 'month' : f.t === 'tel' ? 'tel' : 'text'}" ${num ? 'inputmode="numeric"' : ''} ${f.t === 'tel' ? 'maxlength="10"' : ''} value="${esc(v)}" autocomplete="off">${mic}</div></div>`;
+  return `<div class="f">${lab}<div class="inp"><input data-k="${f.k}" type="${f.t === 'month' ? 'month' : f.t === 'tel' ? 'tel' : 'text'}" ${num ? 'inputmode="numeric"' : ''} ${f.t === 'tel' ? 'maxlength="10"' : ''} value="${esc(v)}" placeholder="${esc(f.ph || '')}" autocomplete="off">${mic}</div></div>`;
 }
 function comboInner(ref, v) {
   return v ? `<div class="pill"><span>${esc(refLabel(ref, v) || v)}</span><button type="button" data-cclear="1" aria-label="Hatayein">${ic('x', 16)}</button></div>`
@@ -414,13 +419,22 @@ function closeForm() { if (fRec) fRec.stop(); $('#modal').hidden = true; $('#mod
 
 function collect() {
   const e = FORM.e, M = $('#modal'), d = {}, extras = [];
+  const self = FORM.mode === 'pv' ? 'tmp:' + FORM.item.tmp : (FORM.row && FORM.row.ID) || 'tmp:main';   // Village form: naye log isi gaon ke
   e.fields.forEach(f => {
+    if (f.hide) return;
     const w = $(`[data-k="${f.k}"]`, M);
     if (f.t === 'ref') {
       let v = w.dataset.val || '';
       const inp = $('.cinp', w);
       if (!v && inp && inp.value.trim()) { const ex = comboOpts(w, inp.value).find(o => !o.neu && norm(o.label) === norm(inp.value)); v = ex ? ex.id : 'new:' + inp.value.trim() }
-      if (v.startsWith('new:')) { const tmp = 'n' + (++TMPN); extras.push({ entity: f.ref, tmp, data: { Name: v.slice(4) } }); v = 'tmp:' + tmp }
+      if (v.startsWith('new:')) {
+        const tmp = 'n' + (++TMPN), nd = Object.assign({ Name: v.slice(4) }, f.role ? { Roles: f.role } : {}, f.ref === 'RealEstate' ? { Kind: 'Colony', Month: today().slice(0, 7) } : {});
+        if (e.key === 'Villages') nd.VillageID = self;
+        extras.push({ entity: f.ref, tmp, data: nd }); v = 'tmp:' + tmp;
+      } else if (f.role && FORM.mode !== 'pv') {   // pehle se bana vyakti chuna: role (aur gaon khali ho to gaon) jod do
+        const p = byId('People', v);
+        if (p && !(p.Roles || '').split(', ').includes(f.role)) extras.push({ entity: 'People', data: Object.assign({ ID: p.ID, Roles: [p.Roles, f.role].filter(Boolean).join(', ') }, p.VillageID ? {} : { VillageID: self }) });
+      }
       d[f.k] = v;
     } else if (f.t === 'select' || f.t === 'yn' || f.t === 'multi') d[f.k] = $$('.chip.on', w).map(b => b.dataset.v).join(', ');
     else d[f.k] = w.value.trim();
@@ -446,7 +460,7 @@ async function saveForm() {
   }
   if (FORM.row) d.ID = FORM.row.ID;
   else { const dup = findDup(e.key, d); if (dup) { const ch = await ask('Already exists', `"${titleOf(e.key, dup)}" is already in the database.`, ['Update existing', 'Create new']); if (ch === null) return; if (ch === 0) d = mergeOnto(e, d, dup) } }
-  try { busy('Saving…'); S.data = await api('saveBatch', { items: extras.concat([{ entity: e.key, data: d }]) }); closeForm(); render(); toast('Saved') }
+  try { busy('Saving…'); S.data = await api('saveBatch', { items: extras.concat([{ entity: e.key, tmp: 'main', data: d }]) }); closeForm(); render(); toast('Saved') }
   catch (err) { toast(err.message, 1) } finally { idle() }
 }
 async function delForm() {
@@ -605,8 +619,9 @@ function prepItems(raw) {
     if (m) { it.data[f.k] = m.ID; return }
     const t = items.find(x => x.entity === f.ref && x !== it && fold(x.data.Name) === fold(v));
     if (t) { it.data[f.k] = 'tmp:' + t.tmp; return }
-    const tmp = 'r' + (++TMPN), nd = { Name: v };
+    const tmp = 'r' + (++TMPN), nd = Object.assign({ Name: v }, f.role ? { Roles: f.role } : {});
     if (f.ref !== 'Villages' && it.data.VillageID) nd.VillageID = it.data.VillageID;
+    if (it.entity === 'Villages' && f.ref !== 'Villages') nd.VillageID = 'tmp:' + it.tmp;
     items.push({ entity: f.ref, tmp, existingId: '', data: nd, evidence: '', flag: '', include: true, auto: true });
     it.data[f.k] = 'tmp:' + tmp;
   };
