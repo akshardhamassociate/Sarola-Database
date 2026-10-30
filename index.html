@@ -3,64 +3,71 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0B5D4E">
+<meta name="theme-color" content="#243B78">
 <title>Sarola Field Database</title>
 <link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
-:root{--bg:#F3F5F7;--card:#fff;--ink:#0F172A;--mut:#64748B;--line:#E4E8EE;--pri:#0B7A65;--pri-d:#0B5D4E;--pri-l:#E3F3EE;--warn:#A15C07;--warn-l:#FDF1D3;--bad:#B42318;--bad-l:#FDE7E4;--sh:0 1px 2px rgba(15,23,42,.05),0 6px 20px rgba(15,23,42,.06);--r:16px}
+/* Design tokens: Akshardham PMS PRD v1, section 6.2 */
+:root{--bg:#F3F5F9;--card:#FFFFFF;--ink:#182230;--mut:#667085;--line:#E2E6EF;--pri:#3446A8;--pri-d:#243B78;--pri-l:#EBEEF8;--ok:#16865B;--ok-l:#E6F4EE;--warn-c:#D97706;--warn:#B54708;--warn-l:#FEF3E2;--bad:#D92D20;--bad-l:#FEE4E2;--sh:0 1px 2px rgba(16,24,40,.05);--r:12px;--rc:8px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Devanagari",sans-serif}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,Aptos,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Devanagari",sans-serif;font-feature-settings:"tnum" 0}
+:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
 button,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none;padding:0}
 svg{display:block;flex:none}
 .wrap{max-width:720px;margin:0 auto}
 .grow{flex:1;min-width:0}
 /* login */
-.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,#0B5D4E,#0B7A65 55%,#12957B)}
-.lcard{background:#fff;border-radius:22px;padding:28px 22px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+.lcard{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:32px 24px;width:100%;max-width:380px;box-shadow:var(--sh)}
 
 .lcard h1{font-size:21px;margin:0 0 4px}.lcard p{margin:0 0 18px;color:var(--mut)}
 /* top */
-.top{position:sticky;top:0;z-index:5;background:rgba(243,245,247,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top{position:sticky;top:0;z-index:5;background:#fff;backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .top .wrap{display:flex;align-items:center;gap:10px;padding:12px 16px}
 .brand{font-weight:700;font-size:17px;letter-spacing:-.01em}.sub{color:var(--mut);font-size:12.5px}
 .logo{height:34px;width:auto;display:block;flex:none}.lcard .logo{height:64px;margin-bottom:14px}
 .sub.other{color:var(--warn);font-weight:650}.item small.by{display:flex;align-items:center;gap:4px;color:var(--pri-d)}
 .fsec{font-size:12.5px;font-weight:750;text-transform:uppercase;letter-spacing:.06em;color:var(--pri-d);margin:24px 0 12px;padding-top:16px;border-top:1px solid var(--line)}.mbody .fsec:first-of-type{margin-top:4px;padding-top:0;border-top:0}
-.icon-btn{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--mut)}
+.appsw{display:inline-flex;gap:2px;background:var(--bg);border:1px solid var(--line);border-radius:var(--rc);padding:2px;margin-bottom:3px}.appsw a,.appsw b{padding:3px 10px;border-radius:6px;font-size:13px;font-weight:600;color:var(--mut);text-decoration:none}.appsw b{background:var(--pri);color:#fff}
+.icon-btn{width:40px;height:40px;border-radius:var(--rc);display:flex;align-items:center;justify-content:center;color:var(--mut)}
 .icon-btn:active{background:var(--line)}
 main{padding:16px 16px 120px}
 h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:22px 2px 10px;font-weight:700}
-.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:16px}
 /* nav */
+/* PMS app ke andar (iframe): upar ka header PMS ka, yahan wala chhupao */
+body.embed .top{display:none}
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 .nav .wrap{display:grid;grid-template-columns:repeat(5,1fr);align-items:end;height:66px}
 .nb{height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--mut);font-size:11.5px;font-weight:600}
 .nb.on{color:var(--pri-d)}
-.nb.big span.c{width:58px;height:58px;border-radius:50%;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;margin-top:-26px;box-shadow:0 8px 20px rgba(11,122,101,.4);border:4px solid #fff}
+.nb.big span.c{width:58px;height:58px;border-radius:50%;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;margin-top:-26px;box-shadow:0 4px 12px rgba(52,70,168,.30);border:4px solid #fff}
 .nb.big.on span.c{background:var(--pri-d)}
 /* buttons / inputs */
-.btn{height:50px;padding:0 18px;border-radius:14px;font-weight:650;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:1px solid var(--line)}
+.btn{height:48px;padding:0 18px;border-radius:var(--rc);font-weight:650;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:1px solid var(--line)}
 .btn.pri{background:var(--pri);color:#fff;border-color:var(--pri)}.btn.pri:active{background:var(--pri-d)}
-.btn.ghost{background:transparent}.btn.danger{color:var(--bad)}.btn.sm{height:38px;padding:0 12px;border-radius:11px;font-size:13.5px}
+.btn.ghost{background:transparent}.btn.danger{color:var(--bad)}.btn.sm{height:36px;padding:0 12px;border-radius:var(--rc);font-size:13.5px}
 .btn.block{width:100%}
-input[type=text],input[type=tel],input[type=month],input[type=password],textarea{width:100%;min-height:50px;padding:12px 14px;border:1.5px solid var(--line);border-radius:13px;background:#fff;outline:none;font-size:16px}
+input[type=text],input[type=tel],input[type=month],input[type=password],textarea{width:100%;min-height:48px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--rc);background:#fff;outline:none;font-size:16px}
 textarea{resize:vertical;min-height:64px}
-input:focus,textarea:focus{border-color:var(--pri);box-shadow:0 0 0 4px var(--pri-l)}
+input:focus,textarea:focus{border-color:var(--pri);box-shadow:0 0 0 3px var(--pri-l)}
 .f{margin-bottom:16px}.f label{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;margin-bottom:7px}
 .req{font-style:normal;font-weight:600;font-size:10.5px;color:var(--pri-d);background:var(--pri-l);padding:2px 7px;border-radius:99px}
 .inp{position:relative}.inp input,.inp textarea{padding-right:50px}
-.fmic{position:absolute;right:6px;top:6px;width:38px;height:38px;border-radius:11px;color:var(--mut);display:flex;align-items:center;justify-content:center}
+.fmic{position:absolute;right:5px;top:5px;width:38px;height:38px;border-radius:var(--rc);color:var(--mut);display:flex;align-items:center;justify-content:center}
 .fmic.live{background:var(--bad);color:#fff;animation:pulse 1.2s infinite}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{min-height:40px;padding:8px 14px;border-radius:99px;border:1.5px solid var(--line);background:#fff;font-size:14px;font-weight:550;text-align:left}
+.chip{min-height:40px;padding:8px 14px;border-radius:var(--rc);border:1px solid var(--line);background:#fff;font-size:14px;font-weight:550;text-align:left}
 .chip.on{background:var(--pri);border-color:var(--pri);color:#fff}
 .combo{position:relative}
-.pill{display:flex;align-items:center;gap:8px;min-height:50px;padding:8px 8px 8px 14px;border:1.5px solid var(--pri);background:var(--pri-l);border-radius:13px;font-weight:600}
+.pill{display:flex;align-items:center;gap:8px;min-height:48px;padding:8px 8px 8px 14px;border:1px solid var(--pri);background:var(--pri-l);border-radius:var(--rc);font-weight:600}
 .pill span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.pill button{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--pri-d)}
-.dd{position:absolute;left:0;right:0;top:54px;z-index:3;background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:var(--sh);overflow:hidden;max-height:260px;overflow-y:auto}
+.pill button{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--pri-d)}
+.dd{position:absolute;left:0;right:0;top:52px;z-index:3;background:#fff;border:1px solid var(--line);border-radius:var(--rc);box-shadow:0 8px 24px rgba(16,24,40,.10);overflow:hidden;max-height:260px;overflow-y:auto}
 .opt{display:block;width:100%;text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}.opt:last-child{border:0}
 .opt b{display:block;font-weight:600}.opt small{color:var(--mut)}.opt.neu b{color:var(--pri-d)}
 /* dashboard */
@@ -69,64 +76,64 @@ input:focus,textarea:focus{border-color:var(--pri);box-shadow:0 0 0 4px var(--pr
 .ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:27px;font-weight:750;letter-spacing:-.02em}
 .hero h3{margin:0 0 4px;font-size:18px}.hero p{margin:0;color:var(--mut);font-size:13.5px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
-.stat{background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:12px}.stat b{display:block;font-size:22px;letter-spacing:-.02em}.stat span{color:var(--mut);font-size:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:12px}.stat b{display:block;font-size:22px;letter-spacing:-.02em}.stat span{color:var(--mut);font-size:12px}
 .stat.bad b{color:var(--bad)}
 .line{display:block;width:100%;text-align:left;padding:13px 0;border-bottom:1px solid var(--line)}.line:last-child{border:0;padding-bottom:0}.line:first-child{padding-top:0}
 .lrow{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:7px}
 .lrow b{font-weight:600}.lrow span{color:var(--mut);font-size:13px;white-space:nowrap}
 .bar{height:8px;border-radius:99px;background:#EDF0F4;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px;background:var(--pri)}
-.bar.late i{background:var(--bad)}.bar.done i{background:#16A34A}
+.bar.late i{background:var(--bad)}.bar.done i{background:var(--ok)}
 .tagc{display:inline-block;font-size:11px;font-weight:650;padding:2px 8px;border-radius:99px;background:#EDF0F4;color:var(--mut);margin-left:6px}
-.tagc.late{background:var(--bad-l);color:var(--bad)}.tagc.done{background:#DCFCE7;color:#166534}
+.tagc.late{background:var(--bad-l);color:#B42318}.tagc.done{background:var(--ok-l);color:var(--ok)}
 .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-.vg{background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:12px;text-align:left}.vg b{display:block;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vg{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:12px;text-align:left}.vg b{display:block;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vg span{font-size:12px;color:var(--mut);display:block;margin-top:6px}
 /* data */
 .tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 16px 12px;margin:0 -16px;scrollbar-width:none;position:relative;-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}.tabs::-webkit-scrollbar{display:none}
-.tab{flex:none;height:38px;padding:0 14px;border-radius:99px;background:#fff;border:1.5px solid var(--line);font-weight:600;font-size:13.5px;color:var(--mut)}
-.tab.on{background:var(--ink);border-color:var(--ink);color:#fff}.tab em{font-style:normal;opacity:.6;margin-left:5px}
+.tab{flex:none;height:36px;padding:0 14px;border-radius:var(--rc);background:#fff;border:1px solid var(--line);font-weight:600;font-size:13.5px;color:var(--mut)}
+.tab.on{background:var(--pri);border-color:var(--pri);color:#fff}.tab em{font-style:normal;opacity:.6;margin-left:5px}
 .search{position:relative;margin-bottom:12px}.search svg{position:absolute;left:14px;top:15px;color:var(--mut)}.search input{padding-left:44px}
-.item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:12px;margin-bottom:9px}
-.av{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none}
+.item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:12px;margin-bottom:9px}
+.av{width:40px;height:40px;border-radius:var(--rc);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none}
 .item b{display:block;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.item small{color:var(--mut);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .badge{font-size:11px;font-weight:650;padding:3px 8px;border-radius:99px;background:var(--warn-l);color:var(--warn);flex:none}
 .empty{text-align:center;color:var(--mut);padding:36px 16px}
 .empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
 /* voice */
 .vhero{text-align:center;padding:26px 16px}
-.bigmic{width:132px;height:132px;border-radius:50%;background:var(--pri);color:#fff;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 14px 34px rgba(11,122,101,.38),0 0 0 12px var(--pri-l)}
-.bigmic.rec{background:var(--bad);box-shadow:0 14px 34px rgba(180,35,24,.35),0 0 0 12px var(--bad-l);animation:pulse 1.4s infinite}
+.bigmic{width:132px;height:132px;border-radius:50%;background:var(--pri);color:#fff;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(52,70,168,.28),0 0 0 12px var(--pri-l)}
+.bigmic.rec{background:var(--bad);box-shadow:0 8px 20px rgba(217,45,32,.28),0 0 0 12px var(--bad-l);animation:pulse 1.4s infinite}
 @keyframes pulse{50%{transform:scale(1.05)}}
 @media (prefers-reduced-motion:reduce){.bigmic.rec,.fmic.live{animation:none}}
 .vhero h3{font-size:19px;margin:22px 0 4px}.vhero p{color:var(--mut);margin:0}
 .timer{font-size:34px;font-weight:750;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:20px}
 .tips{margin:0;padding-left:18px;color:var(--mut);font-size:13.5px}.tips li{margin-bottom:5px}
 .or{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.pcard{background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:13px;margin-bottom:10px;display:flex;gap:11px;align-items:flex-start}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:13px;margin-bottom:10px;display:flex;gap:11px;align-items:flex-start}
 .pcard.off{opacity:.45}
-.tick{width:28px;height:28px;border-radius:9px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;color:transparent;flex:none;margin-top:1px}
+.tick{width:28px;height:28px;border-radius:6px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;color:transparent;flex:none;margin-top:1px}
 .tick.on{background:var(--pri);border-color:var(--pri);color:#fff}
 .etag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
 .pcard b.t{display:block;font-size:15.5px;margin:1px 0 4px}
-.kv{font-size:13.5px;color:#334155}.kv span{color:var(--mut)}
+.kv{font-size:13.5px;color:var(--ink)}.kv span{color:var(--mut)}
 .ev{font-size:12.5px;color:var(--mut);border-left:3px solid var(--line);padding-left:9px;margin-top:8px;font-style:italic}
 .flags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .flag{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--warn-l);color:var(--warn)}.flag.bad{background:var(--bad-l);color:var(--bad)}.flag.ok{background:var(--pri-l);color:var(--pri-d)}
 .flag button{text-decoration:underline;font-weight:650;margin-left:4px;color:inherit;font-size:inherit}
 .stick{position:sticky;bottom:82px;display:flex;gap:10px;padding-top:10px;background:linear-gradient(transparent,var(--bg) 30%)}
-details.box{background:var(--card);border-radius:14px;box-shadow:var(--sh);padding:12px 14px;margin-bottom:12px}details.box summary{font-weight:600;cursor:pointer}details.box p{margin:10px 0 0;color:#334155;white-space:pre-wrap}
+details.box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin-bottom:12px}details.box summary{font-weight:600;cursor:pointer}details.box p{margin:10px 0 0;color:var(--ink);white-space:pre-wrap}
 .prog{height:10px;border-radius:99px;background:#EDF0F4;overflow:hidden;margin:18px auto 0;max-width:320px}.prog i{display:block;height:100%;background:var(--pri);border-radius:99px;transition:width .3s}
 /* modal */
-.modal{position:fixed;inset:0;z-index:20;background:rgba(15,23,42,.45);display:flex;align-items:flex-end;justify-content:center}
-.panel{background:var(--bg);width:100%;max-width:720px;max-height:94vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden}
-@media(min-width:760px){.modal{align-items:center}.panel{border-radius:22px;max-height:88vh}}
+.modal{position:fixed;inset:0;z-index:20;background:rgba(24,34,48,.45);display:flex;align-items:flex-end;justify-content:center}
+.panel{background:var(--bg);width:100%;max-width:720px;max-height:94vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column;overflow:hidden}
+@media(min-width:760px){.modal{align-items:center}.panel{border-radius:var(--r);max-height:88vh}}
 .mhead{display:flex;align-items:center;gap:10px;padding:16px 12px 12px 18px;background:#fff;border-bottom:1px solid var(--line)}
 .mtitle{font-weight:700;font-size:17px}.msub{color:var(--mut);font-size:12.5px}
 .mbody{padding:16px 18px;overflow-y:auto;flex:1}
 .mfoot{display:flex;gap:10px;padding:12px 18px calc(12px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line)}
-.guide{background:var(--pri-l);border-radius:13px;padding:11px 14px;margin-bottom:16px;font-size:13.5px}.guide summary{font-weight:650;color:var(--pri-d);cursor:pointer}.guide p{margin:8px 0 0}.guide b{color:var(--pri-d)}
+.guide{background:var(--pri-l);border-radius:var(--rc);padding:11px 14px;margin-bottom:16px;font-size:13.5px}.guide summary{font-weight:650;color:var(--pri-d);cursor:pointer}.guide p{margin:8px 0 0}.guide b{color:var(--pri-d)}
 .pick{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pick .item{margin:0}
-.askc{background:#fff;border-radius:20px;padding:22px;margin:auto 20px;max-width:380px;width:100%}.askc h3{margin:0 0 6px;font-size:17px}.askc p{margin:0 0 16px;color:var(--mut)}.askc .btn{width:100%;margin-top:8px}
+.askc{background:#fff;border-radius:var(--r);padding:22px;margin:auto 20px;max-width:380px;width:100%}.askc h3{margin:0 0 6px;font-size:17px}.askc p{margin:0 0 16px;color:var(--mut)}.askc .btn{width:100%;margin-top:8px}
 #ask{align-items:center;z-index:30}
 #busy{position:fixed;inset:0;z-index:40;background:rgba(255,255,255,.75);display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;font-weight:600}
 .spin{width:36px;height:36px;border-radius:50%;border:4px solid var(--pri-l);border-top-color:var(--pri);animation:sp .8s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
@@ -141,14 +148,15 @@ details.box{background:var(--card);border-radius:14px;box-shadow:var(--sh);paddi
     <img class="logo" src="logo.png" alt="Akshardham Associates" onerror="this.remove()">
     <h1>Sarola Field Database</h1>
     <p id="lmsg" style="color:var(--bad)"></p>
-    <button class="btn pri block" data-act="reload">Retry</button>
+    <a class="btn pri block" id="lgo" hidden>Open Akshardham PMS to sign in</a>
+    <button class="btn pri block" data-act="reload" id="lretry">Retry</button>
   </div>
 </div>
 
 <div id="app" hidden>
   <header class="top"><div class="wrap">
     <img class="logo" src="logo.png" alt="Akshardham Associates" onerror="this.remove()">
-    <div class="grow"><div class="brand">Sarola Field Database</div><button class="sub" id="who" data-act="who"></button></div>
+    <div class="grow"><nav class="appsw" aria-label="App"><a id="swTasks">Tasks</a><b aria-current="page">Field Data</b></nav><div class="sub" id="who"></div></div>
     <button class="icon-btn" data-act="reload" aria-label="Refresh" id="bReload"></button>
   </div></header>
   <main class="wrap" id="view"></main>
@@ -164,9 +172,10 @@ details.box{background:var(--card);border-radius:14px;box-shadow:var(--sh);paddi
 <script>
 /* ====== YAHAN APNA APPS SCRIPT WEB APP URL PASTE KAREIN ====== */
 const API_URL = 'https://script.google.com/macros/s/AKfycbxgNOAHAa7v1LmnoklvbeHt2kGYBB_7Bq2tqI-8yJQT73VZXgjytt6J_JOetGF5CU4c/exec';
-const USERS = ['Rupesh', 'Krishan', 'Bhavesh', 'Luv'];   // jo log entry karenge; naam yahan jod/hata sakte ho
-const DEFAULT_USER = 'Rupesh';
-const VER = '15 Oct · v11';   // Guide tab ke neeche dikhta hai: naya index.html phone tak pahuncha ya nahi                           // app khulte hi yahi naam, koi sawaal nahi
+const PMS_URL = '../akshardham-pms/';   // naya PMS app: login yahin hota hai, Field Data uske andar khulta hai
+const TASKS_URL = PMS_URL;
+const EMBED = /[?&]embed=1/.test(location.search) && window.top !== window.self;
+const VER = '30 Oct · v14';   // Guide tab ke neeche dikhta hai: naya index.html phone tak pahuncha ya nahi                           // app khulte hi yahi naam, koi sawaal nahi
 /* ============================================================== */
 
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -188,10 +197,10 @@ const ic = (n, s = 22) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" f
 const HUES = [162, 220, 28, 280, 200, 340, 45, 255, 12, 185];
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-const QU = new URLSearchParams(location.search).get('u'), QM = QU && USERS.find(x => x.toLowerCase() === QU.toLowerCase());
-if (QM) store.set('sfd_home', QM);   // apna link (...index.html?u=Bhavesh) is phone ka naam hamesha ke liye set karta hai
-const HOME = QM || store.get('sfd_home') || DEFAULT_USER;
-let S = null, AUTH = { user: HOME };   // "change" se badla naam sirf app band hone tak; agli baar phir HOME
+/* Login Task Tracker ka: wahan ka session token (ts_token) yahan bhi chalta hai. Entry ka naam backend token se leta hai. */
+const SES = (() => { try { const t = store.get('ts_token'), b = t.split('.')[0].replace(/-/g, '+').replace(/_/g, '/');
+  const o = JSON.parse(decodeURIComponent(escape(atob(b)))); return o.x > Date.now() ? { token: t, name: o.n } : null } catch (e) { return null } })();
+let S = null, AUTH = { user: SES ? SES.name : '' };
 let TAB = 'dash', CUR = 'People', Q = '', FORM = null, TMPN = 0, REC = null, fRec = null;
 let PV = { state: 'idle', items: [], transcript: '', msg: '', pct: 0 };
 
@@ -199,11 +208,11 @@ let PV = { state: 'idle', items: [], transcript: '', msg: '', pct: 0 };
 async function api(action, body) {
   let res;
   try {
-    res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action, user: AUTH.user }, body || {})) });
+    res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action, token: SES && SES.token }, body || {})) });
   } catch (e) { throw new Error('Could not connect to the internet or server') }
   let j;
   try { j = JSON.parse(await res.text()) } catch (e) { throw new Error('Backend URL or deployment is wrong: use the /exec URL and set "Who has access: Anyone"') }
-  if (!j.ok) throw new Error(j.error || 'Something went wrong');
+  if (!j.ok) { if (/^LOGIN/.test(j.error || '')) { needLogin(j.error.replace(/^LOGIN:\s*/, '')); throw new Error('') } throw new Error(j.error || 'Something went wrong') }
   if (S && (action === 'saveBatch' || action === 'remove')) { S.data = j.data; store.set('sfd_cache', JSON.stringify(S)) }
   return j.data;
 }
@@ -287,7 +296,7 @@ function calc() {
 function render() {
   $('#nav').innerHTML = [['dash', 'home', 'Dashboard'], ['data', 'list', 'Data'], ['voice', 'mic', 'Speak'], ['add', 'plus', 'New'], ['guide', 'book', 'Guide']]
     .map(([k, i, l]) => k === 'voice' ? `<button class="nb big ${TAB == k ? 'on' : ''}" data-tab="${k}"><span class="c">${ic(i, 26)}</span>${l}</button>` : `<button class="nb ${TAB == k ? 'on' : ''}" data-tab="${k}">${ic(i)}${l}</button>`).join('');
-  $('#who').textContent = 'Entry: ' + AUTH.user + ' · change'; $('#who').classList.toggle('other', AUTH.user !== HOME);
+  $('#who').textContent = 'Logged in: ' + AUTH.user;
   $('#view').innerHTML = ({ dash: vDash, data: vData, voice: vVoice, guide: vGuide })[TAB]();
   if (TAB === 'data') { renderList(); const t = $('.tab.on'); if (t) t.parentNode.scrollLeft = t.offsetLeft - (t.parentNode.clientWidth - t.offsetWidth) / 2 }
 }
@@ -664,7 +673,6 @@ document.addEventListener('click', async ev => {
     case 'save': return saveForm();
     case 'del': return delForm();
     case 'reload': return load();
-    case 'who': return pickUser();
     case 'recstart': return startRec();
     case 'recstop': return REC && REC.mr.stop();
     case 'reccancel': if (REC) { REC.cancel = true; REC.mr.stop() } return;
@@ -691,11 +699,13 @@ document.addEventListener('touchend', ev => {
 }, { passive: true });
 /* Phone ka Back: pehle popup/form band, phir Dashboard, phir "App band karein?" poochho */
 /* Android Chrome bina tap ke bani history entry ko Back par skip kar deta hai (app seedha band). Isliye guard pehle tap ke baad lagta hai. */
-history.replaceState({ b: 0 }, '');
+/* PMS ke andar (EMBED) Back PMS app sambhalta hai: yahan guard nahi lagta */
+if (!EMBED) history.replaceState({ b: 0 }, '');
 const guard = () => history.pushState({ b: 1 }, '');
-let ARMED = false;
+let ARMED = EMBED;
 addEventListener('pointerdown', () => { if (!ARMED) { ARMED = true; guard() } }, true);
 addEventListener('popstate', async () => {
+  if (EMBED) return;
   if (!$('#ask').hidden) { guard(); return $('#ask [data-i="-1"]').click() }
   if (!$('#modal').hidden) {
     guard();
@@ -710,9 +720,9 @@ addEventListener('popstate', async () => {
 $('#afile').addEventListener('change', ev => { const f = ev.target.files[0]; ev.target.value = ''; if (f) runAudio(f) });
 
 /* ---------------- boot ---------------- */
-async function pickUser() {
-  const i = await ask('Who is making entries?', `This name is saved with every entry in the Sheet. It goes back to ${HOME} when the app is closed.`, USERS);
-  if (i !== null) { AUTH.user = USERS[i]; if (S) render(); if (AUTH.user !== HOME) toast('Entries will now be saved as ' + AUTH.user) }
+function needLogin(msg) {   // token nahi / galat / purana: Tasks app me login karwao
+  $('#app').hidden = true; $('#login').hidden = false; $('#lmsg').textContent = msg || 'Please sign in to Akshardham PMS first.';
+  $('#lgo').hidden = false; $('#lretry').hidden = true; idle();
 }
 /* Pehle phone me rakha pichhla data turant dikhao, server (Apps Script, 3-8 sec) ka naya data peeche se aane do */
 async function load() {
@@ -720,7 +730,7 @@ async function load() {
   if (!S) { try { cached = JSON.parse(store.get('sfd_cache')) } catch (e) { } }
   if (cached && cached.schema) { S = cached; show(true) } else busy('Loading…');
   try { S = await api('init'); store.set('sfd_cache', JSON.stringify(S)); show(!cached) }
-  catch (e) { if (S) toast('Could not get new data from the server, showing saved data', 1); else { $('#app').hidden = true; $('#login').hidden = false; $('#lmsg').textContent = e.message } }
+  catch (e) { if (!e.message) return; if (S) toast('Could not get new data from the server, showing saved data', 1); else { $('#app').hidden = true; $('#login').hidden = false; $('#lmsg').textContent = e.message } }
   finally { idle() }
 }
 function show(force) {
@@ -728,8 +738,10 @@ function show(force) {
   const a = document.activeElement, busyUser = !$('#modal').hidden || (a && /INPUT|TEXTAREA/.test(a.tagName)) || PV.state === 'rec' || PV.state === 'proc';
   if (force || !busyUser) render();   // form bhar rahe ho to beech me screen nahi badlegi
 }
-$('#bReload').innerHTML = ic('refresh');
+$('#bReload').innerHTML = ic('refresh'); $('#lgo').href = $('#swTasks').href = TASKS_URL;
+if (EMBED) { document.body.classList.add('embed'); $('#lgo').href = PMS_URL; $('#lgo').target = '_top'; $('#lgo').textContent = 'Sign in again' }
 if (!/^https?:/.test(API_URL)) { $('#login').hidden = false; $('#lmsg').textContent = 'Setup pending: paste the Apps Script web app URL into API_URL in index.html.' }
+else if (!SES) needLogin('Please sign in to Akshardham PMS first.');
 else load();
 </script>
 </body>
