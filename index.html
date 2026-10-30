@@ -7,7 +7,7 @@
 <title>Sarola Field Database</title>
 <link rel="icon" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
 <style>
 /* Design tokens: Akshardham PMS PRD v1, section 6.2 */
 :root{--bg:#F3F5F9;--card:#FFFFFF;--ink:#182230;--mut:#667085;--line:#E2E6EF;--pri:#3446A8;--pri-d:#243B78;--pri-l:#EBEEF8;--ok:#16865B;--ok-l:#E6F4EE;--warn-c:#D97706;--warn:#B54708;--warn-l:#FEF3E2;--bad:#D92D20;--bad-l:#FEE4E2;--sh:0 1px 2px rgba(16,24,40,.05);--r:12px;--rc:8px}
@@ -175,7 +175,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxgNOAHAa7v1LmnoklvbeHt
 const PMS_URL = '../akshardham-pms/';   // naya PMS app: login yahin hota hai, Field Data uske andar khulta hai
 const TASKS_URL = PMS_URL;
 const EMBED = /[?&]embed=1/.test(location.search) && window.top !== window.self;
-const VER = '30 Oct · v14';   // Guide tab ke neeche dikhta hai: naya index.html phone tak pahuncha ya nahi                           // app khulte hi yahi naam, koi sawaal nahi
+const VER = '30 Oct · v15';   // Guide tab ke neeche dikhta hai: naya index.html phone tak pahuncha ya nahi                           // app khulte hi yahi naam, koi sawaal nahi
 /* ============================================================== */
 
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
